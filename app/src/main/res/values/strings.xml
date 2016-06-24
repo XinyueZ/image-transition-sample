@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ImageTransitionSample</string>
+    <string name="api_images">http://nasapicapp-dev-1.appspot.com/</string>
+</resources>
