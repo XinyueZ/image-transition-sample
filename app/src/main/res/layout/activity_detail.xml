@@ -6,13 +6,6 @@
 
     <data class="ActivityDetailBinding">
 
-        <import
-            alias="GlideDrawable"
-            type="com.bumptech.glide.load.resource.drawable.GlideDrawable"/>
-
-        <variable
-            name="imageLoadedHandler"
-            type="com.bumptech.glide.request.RequestListener&lt;String, GlideDrawable>"/>
 
         <variable
             name="image"
@@ -50,7 +43,7 @@
                     android:scaleType="fitXY"
                     app:imageUrl="@{image.getImageUrl().getNormal()}"
                     app:layout_collapseMode="parallax"
-                    app:listener="@{imageLoadedHandler}"/>
+                    />
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
@@ -141,11 +134,11 @@
             android:id="@+id/temp_iv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="fitXY"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:scaleType="fitXY"
             app:imageUrl="@{image.getImageUrl().getNormal()}"/>
     </android.support.design.widget.CoordinatorLayout>
 </layout>

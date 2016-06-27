@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.view.View;
@@ -24,23 +23,22 @@ public final class TransitCompat {
 	/**
 	 * There is different between android pre 3.0 and 3.x, 4.x on this wording.
 	 */
-	public static final String ALPHA         = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
-	                                           "alpha" :
-	                                           "Alpha";
-	private static final int    ANIM_DURATION = 600;
+	public static final String ALPHA = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
+	                                   "alpha" :
+	                                   "Alpha";
+	private static final int ANIM_DURATION = 600;
 
 
 	private ColorDrawable mColorDrawable;
 
 	private Thumbnail mThumbnail;
 	private ImageView mTarget;
-	private ImageView mTemp;
+	private ImageView mTransistor;
 
-	private int   mLeftDelta;
-	private int   mTopDelta;
+	private int mLeftDelta;
+	private int mTopDelta;
 	private float mWidthScale;
 	private float mHeightScale;
-
 
 	public static class Builder {
 		private TransitCompat mTransition;
@@ -61,8 +59,8 @@ public final class TransitCompat {
 		}
 
 
-		public Builder setTemp(ImageView temp) {
-			mTransition.mTemp = temp;
+		public Builder setTransistor(ImageView transistor) {
+			mTransition.mTransistor = transistor;
 			return this;
 		}
 
@@ -98,48 +96,64 @@ public final class TransitCompat {
 	 * @param listener For end of animation.
 	 */
 	public void enter(final ViewPropertyAnimatorListener listener) {
-		ViewCompat.setY(mTemp, mThumbnail.getTop());
-		mTemp.getLayoutParams().width =  mThumbnail.getWidth();
-		mTemp.getLayoutParams().height = mThumbnail.getHeight();
+		ViewCompat.setY(mTransistor, mThumbnail.getTop());
+		mTransistor.getLayoutParams().width = mThumbnail.getWidth();
+		mTransistor.getLayoutParams().height = mThumbnail.getHeight();
 
-		// Set starting values for properties we're going to animate. These
-		// values scale and position the full size version down to the thumbnail
-		// size/location, from which we'll animate it back up
-		ViewCompat.setPivotX(mTarget, mTemp.getLeft());
-		ViewCompat.setPivotY(mTarget, mTemp.getBottom() );
+		int transistorStartX = mTarget.getWidth() - mThumbnail.getWidth();
+		int transistorStartY = mTarget.getBottom() - mThumbnail.getHeight();
+		ViewCompat.setPivotX(mTarget, transistorStartX);
+		ViewCompat.setPivotY(mTarget, transistorStartY);
 		ViewCompat.setScaleX(mTarget, mWidthScale);
 		ViewCompat.setScaleY(mTarget, mHeightScale);
 		ViewCompat.setTranslationX(mTarget, mLeftDelta);
 		ViewCompat.setTranslationY(mTarget, mTopDelta);
 
-		ViewPropertyAnimatorCompat helpAnimator = ViewCompat.animate(mTemp);
-		helpAnimator.setDuration(ANIM_DURATION)
-		        .translationY(mTarget.getBottom() -  mThumbnail.getHeight())
-		        .setInterpolator(new LinearInterpolator())
-		        .setListener(new ViewPropertyAnimatorListenerAdapter() {
-			        @Override
-			        public void onAnimationEnd(View view) {
-				        ViewCompat.animate(mTemp).alpha(0).setDuration(ANIM_DURATION * 2).start();
-				        // Animate scale and translation to go from thumbnail to full size
-				        ViewPropertyAnimatorCompat animator = ViewCompat.animate(mTarget);
-				        animator.setDuration(ANIM_DURATION)
-				                .scaleX(1)
-				                .scaleY(1)
-				                .translationX(0)
-				                .translationY(0)
-				                .setInterpolator(new BakedBezierInterpolator())
-				                .setListener(listener);
+		ViewCompat.animate(mTransistor)
+		          .setDuration(ANIM_DURATION)
+		          .translationX(transistorStartX)
+		          .translationY(transistorStartY)
+		          .setInterpolator(new LinearInterpolator())
+		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+			          @Override
+			          public void onAnimationEnd(View view) {
+				          ViewCompat.animate(mTransistor)
+				                    .alpha(0)
+				                    .setDuration(ANIM_DURATION)
+				                    .start();
+				          ViewCompat.animate(mTarget)
+				                    .setDuration(ANIM_DURATION)
+				                    .scaleX(1)
+				                    .scaleY(1)
+				                    .translationX(0)
+				                    .translationY(0)
+				                    .setInterpolator(new BakedBezierInterpolator())
+				                    .setListener(new ViewPropertyAnimatorListenerAdapter(){
+					                    @Override
+					                    public void onAnimationStart(View view) {
+						                    super.onAnimationStart(view);
+						                    listener.onAnimationStart(view);
+					                    }
 
-				        // Fade in the black background
-				        ObjectAnimator bgAnim = ObjectAnimator.ofInt(mColorDrawable,
-				                                                     ALPHA,
-				                                                     0,
-				                                                     255);
-				        bgAnim.setDuration(ANIM_DURATION);
-				        bgAnim.start();
-			        }
-		        });
-		helpAnimator.start();
+					                    @Override
+					                    public void onAnimationEnd(View view) {
+						                    super.onAnimationEnd(view);
+						                    listener.onAnimationEnd(view);
+					                    }
+
+					                    @Override
+					                    public void onAnimationCancel(View view) {
+						                    super.onAnimationCancel(view);
+						                    listener.onAnimationCancel(view);
+					                    }
+				                    })
+				                    .start();
+				          ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
+				                        .setDuration(ANIM_DURATION)
+				                        .start();
+			          }
+		          })
+		          .start();
 	}
 
 
@@ -147,22 +161,72 @@ public final class TransitCompat {
 	 * The exit animation is basically a reverse of the enter animation. This Animate image back to thumbnail
 	 * size/location as relieved from bundle.
 	 */
-	public void exit(ViewPropertyAnimatorListener listener) {
-		ViewPropertyAnimatorCompat animator = ViewCompat.animate(mTarget);
-		animator.setDuration(ANIM_DURATION)
-		        .scaleX(mWidthScale)
-		        .scaleY(mHeightScale)
-		        .translationX(mLeftDelta)
-		        .translationY(mTopDelta)
-		        .setInterpolator(new BakedBezierInterpolator())
-		        .setListener(listener);
+	public void exit(final ViewPropertyAnimatorListener listener) {
+		ViewCompat.setPivotX(mTarget, mTarget.getRight());
+		ViewCompat.setPivotY(mTarget, mTarget.getBottom());
+		ViewCompat.animate(mTarget)
+		          .setDuration(ANIM_DURATION)
+		          .scaleX(mWidthScale)
+		          .scaleY(mHeightScale)
+		          .translationX(mLeftDelta)
+		          .translationY(mTopDelta)
+		          .setInterpolator(new BakedBezierInterpolator())
+		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+			          @Override
+			          public void onAnimationStart(View view) {
+				          super.onAnimationStart(view);
+				          listener.onAnimationStart(view);
+			          }
 
-		// Fade out background
-		ObjectAnimator bgAnim = ObjectAnimator.ofInt(mColorDrawable,
-		                                             ALPHA,
-		                                             0);
-		bgAnim.setDuration(ANIM_DURATION);
-		bgAnim.start();
+			          @Override
+			          public void onAnimationCancel(View view) {
+				          super.onAnimationCancel(view);
+				          listener.onAnimationCancel(view);
+			          }
+
+			          @Override
+			          public void onAnimationEnd(View view) {
+				          super.onAnimationEnd(view);
+				          ViewCompat.animate(mTransistor)
+				                    .setDuration(ANIM_DURATION )
+				                    .alpha(1)
+				                    .setInterpolator(new LinearInterpolator())
+				                    .setListener(new ViewPropertyAnimatorListenerAdapter(){
+					                    @Override
+					                    public void onAnimationStart(View view) {
+						                    super.onAnimationStart(view);
+					                    }
+
+					                    @Override
+					                    public void onAnimationEnd(View view) {
+						                    super.onAnimationEnd(view);
+						                    ViewCompat.animate(mTransistor)
+						                              .translationX(mThumbnail.getLeft())
+						                              .translationY(mThumbnail.getTop())
+						                              .setInterpolator(new LinearInterpolator())
+						                              .setDuration(ANIM_DURATION)
+						                              .setListener(new ViewPropertyAnimatorListenerAdapter(){
+							                              @Override
+							                              public void onAnimationEnd(View view) {
+								                              super.onAnimationEnd(view);
+								                              listener.onAnimationEnd(view);
+							                              }
+						                              })
+						                              .start();
+					                    }
+
+					                    @Override
+					                    public void onAnimationCancel(View view) {
+						                    super.onAnimationCancel(view);
+					                    }
+				                    })
+				                    .start();
+			          }
+		          }).start();
+		ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0)
+		              .setDuration(ANIM_DURATION)
+		              .start();
+
+
 	}
-
 }

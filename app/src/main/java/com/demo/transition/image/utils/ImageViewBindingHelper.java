@@ -9,8 +9,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
 import com.demo.transition.image.app.adapters.ImagesResponseAdapter;
@@ -60,16 +58,6 @@ public final class ImageViewBindingHelper {
 	}
 
 
-	@BindingAdapter({ "imageUrl",
-	                  "listener" })
-	public static void setImageLoader(ImageView imageView, String imageUrl, RequestListener<String, GlideDrawable> listener) {
-		Glide.with(App.Instance)
-		     .load(imageUrl)
-		     .dontAnimate()
-		     .listener(listener)
-		     .diskCacheStrategy(DiskCacheStrategy.ALL)
-		     .into(imageView);
-	}
 
 	@BindingAdapter({ "imagesResponse" })
 	public static void setRecyclerData(RecyclerView rv, ImagesResponse response) {

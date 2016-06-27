@@ -14,15 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.demo.transition.image.R;
 import com.demo.transition.image.databinding.ActivityDetailBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.Thumbnail;
 import com.demo.transition.image.transition.TransitCompat;
-import com.demo.transition.image.utils.ImageViewBindingHelper;
 
 import java.io.Serializable;
 
@@ -69,25 +65,6 @@ public final class DetailActivity extends BaseActivity {
 		Image image = (Image) imageMeta;
 		setTitle(image.getTitle());
 
-		//Show image detail with thumbnail first.
-		//After loading real HD image replace the thumbnail placed ImageView.
-		mBinding.setImageLoadedHandler(new RequestListener<String, GlideDrawable>() {
-			@Override
-			public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-				Serializable imageMeta = getIntent().getSerializableExtra(EXTRAS_IMAGE);
-				Image image = (Image) imageMeta;
-				ImageViewBindingHelper.setImageLoader(mBinding.imageIv,
-				                                      image.getImageUrl()
-				                                           .getHd(),
-				                                      false);
-				return false;
-			}
-
-			@Override
-			public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-				return false;
-			}
-		});
 		mBinding.setImage(image);
 		transitCompat();
 	}
@@ -109,13 +86,14 @@ public final class DetailActivity extends BaseActivity {
 					                .removeOnPreDrawListener(this);
 					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
 					                                         .setTarget(mBinding.imageIv)
-					                                         .setTemp(mBinding.tempIv)
+					                                         .setTransistor(mBinding.tempIv)
 					                                         .build(DetailActivity.this);
 					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
 						@Override
 						public void onAnimationEnd(View view) {
 							super.onAnimationEnd(view);
-							afterTransitCompat();
+							mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
+							mBinding.detailAppBar.setBackgroundResource(R.color.colorPrimary);
 						}
 					});
 					return true;
@@ -124,15 +102,7 @@ public final class DetailActivity extends BaseActivity {
 		}
 	}
 
-	private void afterTransitCompat() {
-		mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
-		mBinding.detailAppBar.setBackgroundResource(R.color.colorPrimary);
-	}
 
-	private void beforeTransitCompat() {
-		mBinding.imageInformationNsv.setVisibility(View.GONE);
-		mBinding.detailAppBar.setBackgroundResource(android.R.color.transparent);
-	}
 
 	@Override
 	public void onBackPressed() {
@@ -140,8 +110,9 @@ public final class DetailActivity extends BaseActivity {
 			mTransition.exit(new ViewPropertyAnimatorListenerAdapter() {
 				@Override
 				public void onAnimationStart(View view) {
-					beforeTransitCompat();
 					super.onAnimationStart(view);
+					mBinding.imageInformationNsv.setVisibility(View.GONE);
+					mBinding.detailAppBar.setBackgroundResource(android.R.color.transparent);
 				}
 
 				@Override
