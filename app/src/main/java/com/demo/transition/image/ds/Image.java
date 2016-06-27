@@ -3,9 +3,10 @@ package com.demo.transition.image.ds;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public final class Image   {
+public final class Image implements Serializable {
 	@SerializedName("reqId")
 	private String mReqId;
 	@SerializedName("description")

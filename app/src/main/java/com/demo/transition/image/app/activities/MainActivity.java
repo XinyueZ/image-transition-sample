@@ -3,7 +3,8 @@ package com.demo.transition.image.app.activities;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.View;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
 import com.demo.transition.image.app.api.Api;
+import com.demo.transition.image.bus.ClickImageEvent;
 import com.demo.transition.image.bus.LoadImagesErrorEvent;
 import com.demo.transition.image.bus.LoadImagesSuccessEvent;
 import com.demo.transition.image.databinding.ActivityMainBinding;
@@ -27,7 +29,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public final class MainActivity extends BaseActivity {
 
 	private static final int LAYOUT = R.layout.activity_main;
 	private ActivityMainBinding mBinding;
@@ -56,21 +58,18 @@ public class MainActivity extends AppCompatActivity {
 
 	}
 
+	/**
+	 * Handler for {@link  ClickImageEvent}.
+	 *
+	 * @param e Event {@link ClickImageEvent}.
+	 */
+	@Subscribe
+	public void onEvent(ClickImageEvent e) {
+		DetailActivity.showInstance(this, e.getImage());
+	}
+
 	//------------------------------------------------
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		EventBus.getDefault()
-		        .register(this);
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		EventBus.getDefault()
-		        .unregister(this);
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +78,30 @@ public class MainActivity extends AppCompatActivity {
 		mBinding.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 		mBinding.setDividerDecoration(new DividerDecoration());
 
+		mBinding.activityMainSrl.setColorSchemeResources(R.color.colorPrimary, R.color.colorAccent, R.color.colorPrimaryDark, R.color.colorBlack);
+		mBinding.activityMainSrl.setProgressViewEndTarget(true, getActionBarHeight() * 2);
+		mBinding.activityMainSrl.setProgressViewOffset(false, 0,  getActionBarHeight() * 2);
+		mBinding.activityMainSrl.setRefreshing(true);
+		mBinding.activityMainSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				loadData();
+			}
+		});
+
+		setSupportActionBar(mBinding.toolbar);
+		mBinding.toolbar.setNavigationIcon(R.drawable.ic_menu);
+		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				ActivityCompat.finishAfterTransition(MainActivity.this);
+			}
+		});
+
+		loadData();
+	}
+
+	private void loadData() {
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
 		int currentMonth = calendar.get(Calendar.MONTH);
@@ -86,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
 		int shownMonth = currentMonth + 1;
 		String timeZone = calendar.getTimeZone()
 		                          .getID();
-
 		loadPhotoList(year, shownMonth, timeZone);
 		if (currentDay < 15) {
 			loadPhotoList(year, currentMonth, timeZone);
@@ -114,12 +136,14 @@ public class MainActivity extends AppCompatActivity {
 					EventBus.getDefault()
 					        .post(new LoadImagesErrorEvent());
 				}
+				mBinding.activityMainSrl.setRefreshing(false);
 			}
 
 			@Override
 			public void onFailure(Call<ImagesResponse> call, Throwable t) {
 				EventBus.getDefault()
 				        .post(new LoadImagesErrorEvent());
+				mBinding.activityMainSrl.setRefreshing(false);
 			}
 		});
 	}
