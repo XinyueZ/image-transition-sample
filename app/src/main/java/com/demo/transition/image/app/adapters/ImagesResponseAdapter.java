@@ -16,7 +16,7 @@ import com.demo.transition.image.ds.ImagesResponse;
 
 import org.greenrobot.eventbus.EventBus;
 
-public final class ImagesListAdapter extends RecyclerView.Adapter<ImagesListAdapter.ImagesListItemViewHolder> {
+public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResponseAdapter.ImagesListItemViewHolder> {
 	/**
 	 * Main layout for this component.
 	 */
@@ -24,14 +24,14 @@ public final class ImagesListAdapter extends RecyclerView.Adapter<ImagesListAdap
 	private final ImagesResponse mImagesResponse;
 
 
-	public ImagesListAdapter(ImagesResponse imagesResponse) {
+	public ImagesResponseAdapter(ImagesResponse imagesResponse) {
 		mImagesResponse = imagesResponse;
 	}
 
 
 	@Override
 	public int getItemCount() {
-		return mImagesResponse.getResult()
+		return mImagesResponse == null ? 0 : mImagesResponse.getResult()
 		                      .size();
 	}
 
@@ -45,7 +45,7 @@ public final class ImagesListAdapter extends RecyclerView.Adapter<ImagesListAdap
 
 	@Override
 	public void onBindViewHolder(ImagesListItemViewHolder holder, int position) {
-		holder.mBinding.setHandler(new ImagesListItemHandler());
+		holder.mBinding.setHandler(new ImagesListItemHandler(holder.mBinding));
 		holder.mBinding.setImage(mImagesResponse.getResult()
 		                                        .get(position));
 		holder.mBinding.executePendingBindings();
@@ -61,9 +61,15 @@ public final class ImagesListAdapter extends RecyclerView.Adapter<ImagesListAdap
 	}
 
 	public static class ImagesListItemHandler {
+		private final ListImagesItemBinding mBinding;
+
+		ImagesListItemHandler(ListImagesItemBinding binding) {
+			mBinding = binding;
+		}
+
 		@SuppressWarnings("unused")
 		public void onImageItemClick(View v) {
-			Image image = (Image) v.getTag();
+			Image image = mBinding.getImage();
 			EventBus.getDefault()
 			        .post(new ClickImageEvent(image));
 		}

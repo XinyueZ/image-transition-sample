@@ -1,8 +1,12 @@
 package com.demo.transition.image.app.activities;
 
 import android.databinding.DataBindingUtil;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 	 */
 	@Subscribe
 	public void onEvent(LoadImagesSuccessEvent e) {
-
+		mBinding.setImagesResponse(e.getImagesResponse());
 	}
 
 	/**
@@ -72,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mBinding = DataBindingUtil.setContentView(this, LAYOUT);
-
+		mBinding.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+		mBinding.setDividerDecoration(new DividerDecoration());
 
 		Calendar calendar = Calendar.getInstance();
 		int year = calendar.get(Calendar.YEAR);
@@ -117,5 +122,22 @@ public class MainActivity extends AppCompatActivity {
 				        .post(new LoadImagesErrorEvent());
 			}
 		});
+	}
+
+
+	public static class DividerDecoration extends RecyclerView.ItemDecoration {
+		@Override
+		public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+			super.getItemOffsets(outRect, view, parent, state);
+			if (!shouldDrawDividerAbove(view, parent)) {
+				outRect.top = App.Instance.getResources()
+				                          .getDimensionPixelOffset(R.dimen.divide_height);
+			}
+		}
+
+		private boolean shouldDrawDividerAbove(View view, RecyclerView parent) {
+			final RecyclerView.ViewHolder holder = parent.getChildViewHolder(view);
+			return holder.getAdapterPosition() == 0;
+		}
 	}
 }
