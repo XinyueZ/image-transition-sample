@@ -9,6 +9,7 @@
         <item name="android:windowBackground">@color/colorWhite</item>
         <item name="android:textColorPrimary">@color/colorWhite</item>
         <item name="android:textColorSecondary">@color/colorBlack</item>
+        <item name="android:textColorTertiary">@color/colorBlack</item>
     </style>
 
 
@@ -21,5 +22,13 @@
         <item name="cardCornerRadius">1dp</item>
     </style>
 
+    <style name="Detail_CV">
+        <item name="cardCornerRadius">4dp</item>
+        <item name="elevation">4dp</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="cardElevation">3dp</item>
+        <item name="contentPadding">5dp</item>
+        <item name="cardBackgroundColor">@color/colorWhite</item>
+    </style>
 
 </resources>
