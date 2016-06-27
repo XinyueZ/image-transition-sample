@@ -65,7 +65,12 @@ public final class MainActivity extends BaseActivity {
 	 */
 	@Subscribe
 	public void onEvent(ClickImageEvent e) {
-		DetailActivity.showInstance(this, e.getImage());
+		if (e.getThumbnail() != null) {
+			e.getThumbnail()
+			 .setSource(e.getImage().getImageUrl()
+			                   .getNormal());
+			DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
+		}
 	}
 
 	//------------------------------------------------
