@@ -7,6 +7,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
 import android.view.View;
 
 import com.demo.transition.image.R;
@@ -32,6 +33,7 @@ import retrofit2.Response;
 public final class MainActivity extends BaseActivity {
 
 	private static final int LAYOUT = R.layout.activity_main;
+	private static final int MENU_MAIN = R.menu.menu_main;
 	private ActivityMainBinding mBinding;
 
 	//------------------------------------------------
@@ -54,7 +56,7 @@ public final class MainActivity extends BaseActivity {
 	 * @param e Event {@link LoadImagesErrorEvent}.
 	 */
 	@Subscribe
-	public void onEvent(LoadImagesErrorEvent e) {
+	public void onEvent(@SuppressWarnings("UnusedParameters") LoadImagesErrorEvent e) {
 
 	}
 
@@ -104,6 +106,12 @@ public final class MainActivity extends BaseActivity {
 		});
 
 		loadData();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(MENU_MAIN, menu);
+		return true;
 	}
 
 	private void loadData() {
