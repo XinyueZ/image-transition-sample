@@ -2,7 +2,7 @@ image-transition-sample
 ====
 
 ## Learning how to make transitions on images, objects to show "list"-"detail".
-#### Project is sampe codes, you can use what worth.
+#### Project with sampe codes, you can use what worth.
 
 - "thumbnail" means meta-data from image-view on "list", inc. "left", "top", "width" and "height".
 
