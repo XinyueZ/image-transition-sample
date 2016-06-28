@@ -14,8 +14,8 @@ import android.view.ViewTreeObserver;
 
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
-import com.demo.transition.image.bus.CloseDetailActivity2Event;
 import com.demo.transition.image.bus.CloseDetailFragmentEvent;
+import com.demo.transition.image.bus.PressBackEvent;
 import com.demo.transition.image.databinding.FragmentDetailBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.Thumbnail;
@@ -55,11 +55,11 @@ public final class DetailFragment extends Fragment {
 				@Override
 				public void onAnimationEnd(View v) {
 					super.onAnimationEnd(v);
-					EventBus.getDefault().post(new CloseDetailActivity2Event());
+					EventBus.getDefault().post(new PressBackEvent());
 				}
 			});
 		} else {
-			EventBus.getDefault().post(new CloseDetailActivity2Event());
+			EventBus.getDefault().post(new PressBackEvent());
 		}
 	}
 
@@ -86,7 +86,7 @@ public final class DetailFragment extends Fragment {
 		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				EventBus.getDefault().post(new CloseDetailActivity2Event());
+				EventBus.getDefault().post(new PressBackEvent());
 			}
 		});
 

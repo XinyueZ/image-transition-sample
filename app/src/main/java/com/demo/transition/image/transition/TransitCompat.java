@@ -108,70 +108,72 @@ public final class TransitCompat {
 	 * @param listener For end of animation.
 	 */
 	public void enter(final ViewPropertyAnimatorListener listener) {
-		if (mTransistor.get() == null) {
-			return;
-		}
-		ImageView transistorIv = mTransistor.get();
-		if (mTarget.get() == null) {
-			return;
-		}
-		ImageView targetIv = mTarget.get();
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+			if (mTransistor.get() == null) {
+				return;
+			}
+			ImageView transistorIv = mTransistor.get();
+			if (mTarget.get() == null) {
+				return;
+			}
+			ImageView targetIv = mTarget.get();
 
-		ViewCompat.setY(transistorIv, mThumbnail.getTop());
-		transistorIv.getLayoutParams().width = mThumbnail.getWidth();
-		transistorIv.getLayoutParams().height = mThumbnail.getHeight();
+			ViewCompat.setY(transistorIv, mThumbnail.getTop());
+			transistorIv.getLayoutParams().width = mThumbnail.getWidth();
+			transistorIv.getLayoutParams().height = mThumbnail.getHeight();
 
-		int transistorStartX = targetIv.getWidth() - mThumbnail.getWidth() - (int) mEdgeGap;
-		int transistorStartY = targetIv.getBottom() - mThumbnail.getHeight();
-		ViewCompat.setPivotX(targetIv, targetIv.getWidth() - targetIv.getWidth() / 2 - (int) mEdgeGap);
-		ViewCompat.setPivotY(targetIv, targetIv.getBottom() - targetIv.getBottom() / 2);
-		ViewCompat.setScaleX(targetIv, mWidthScale);
-		ViewCompat.setScaleY(targetIv, mHeightScale);
-		ViewCompat.setTranslationX(targetIv, mLeftDelta);
-		ViewCompat.setTranslationY(targetIv, mTopDelta);
+			int transistorStartX = targetIv.getWidth() - mThumbnail.getWidth() - (int) mEdgeGap;
+			int transistorStartY = targetIv.getBottom() - mThumbnail.getHeight();
+			ViewCompat.setPivotX(targetIv, targetIv.getWidth() - targetIv.getWidth() / 2 - (int) mEdgeGap);
+			ViewCompat.setPivotY(targetIv, targetIv.getBottom() - targetIv.getBottom() / 2);
+			ViewCompat.setScaleX(targetIv, mWidthScale);
+			ViewCompat.setScaleY(targetIv, mHeightScale);
+			ViewCompat.setTranslationX(targetIv, mLeftDelta);
+			ViewCompat.setTranslationY(targetIv, mTopDelta);
 
-		ViewCompat.animate(transistorIv)
-		          .setDuration(ANIM_DURATION * 2)
-		          .translationX(transistorStartX)
-		          .translationY(transistorStartY)
-		          .setInterpolator(new BakedBezierInterpolator())
-		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
-			          @Override
-			          public void onAnimationEnd(View view) {
-				          if (mTransistor.get() == null) {
-					          return;
-				          }
-				          ImageView transistorIv = mTransistor.get();
-				          super.onAnimationEnd(view);
-				          ViewCompat.animate(transistorIv)
-				                    .alpha(0)
-				                    .setDuration(ANIM_DURATION)
-				                    .setListener(new ViewPropertyAnimatorListenerAdapter() {
-					                    @Override
-					                    public void onAnimationStart(View view) {
-						                    super.onAnimationEnd(view);
-						                    if (mTarget.get() == null) {
-							                    return;
+			ViewCompat.animate(transistorIv)
+			          .setDuration(ANIM_DURATION * 2)
+			          .translationX(transistorStartX)
+			          .translationY(transistorStartY)
+			          .setInterpolator(new BakedBezierInterpolator())
+			          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+				          @Override
+				          public void onAnimationEnd(View view) {
+					          if (mTransistor.get() == null) {
+						          return;
+					          }
+					          ImageView transistorIv = mTransistor.get();
+					          super.onAnimationEnd(view);
+					          ViewCompat.animate(transistorIv)
+					                    .alpha(0)
+					                    .setDuration(ANIM_DURATION)
+					                    .setListener(new ViewPropertyAnimatorListenerAdapter() {
+						                    @Override
+						                    public void onAnimationStart(View view) {
+							                    super.onAnimationEnd(view);
+							                    if (mTarget.get() == null) {
+								                    return;
+							                    }
+							                    ImageView targetIv = mTarget.get();
+							                    ViewCompat.animate(targetIv)
+							                              .setDuration(ANIM_DURATION)
+							                              .scaleX(1)
+							                              .scaleY(1)
+							                              .translationX(0)
+							                              .translationY(0)
+							                              .setInterpolator(new BakedBezierInterpolator())
+							                              .setListener(listener)
+							                              .start();
+							                    ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
+							                                  .setDuration(ANIM_DURATION)
+							                                  .start();
 						                    }
-						                    ImageView targetIv = mTarget.get();
-						                    ViewCompat.animate(targetIv)
-						                              .setDuration(ANIM_DURATION)
-						                              .scaleX(1)
-						                              .scaleY(1)
-						                              .translationX(0)
-						                              .translationY(0)
-						                              .setInterpolator(new BakedBezierInterpolator())
-						                              .setListener(listener)
-						                              .start();
-						                    ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
-						                                  .setDuration(ANIM_DURATION)
-						                                  .start();
-					                    }
-				                    })
-				                    .start();
-			          }
-		          })
-		          .start();
+					                    })
+					                    .start();
+				          }
+			          })
+			          .start();
+		}
 	}
 
 
@@ -180,51 +182,53 @@ public final class TransitCompat {
 	 * size/location as relieved from bundle.
 	 */
 	public void exit(final ViewPropertyAnimatorListener listener) {
-		if (mTransistor.get() == null) {
-			return;
-		}
-		ImageView transistorIv = mTransistor.get();
-		if (mTarget.get() == null) {
-			return;
-		}
-		ImageView targetIv = mTarget.get();
-		ViewCompat.animate(transistorIv)
-		          .setDuration(ANIM_DURATION / 2)
-		          .alpha(1)
-		          .setInterpolator(new BakedBezierInterpolator())
-		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
-			          @Override
-			          public void onAnimationEnd(View view) {
-				          if (mTransistor.get() == null) {
-					          return;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+			if (mTransistor.get() == null) {
+				return;
+			}
+			ImageView transistorIv = mTransistor.get();
+			if (mTarget.get() == null) {
+				return;
+			}
+			ImageView targetIv = mTarget.get();
+			ViewCompat.animate(transistorIv)
+			          .setDuration(ANIM_DURATION / 2)
+			          .alpha(1)
+			          .setInterpolator(new BakedBezierInterpolator())
+			          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+				          @Override
+				          public void onAnimationEnd(View view) {
+					          if (mTransistor.get() == null) {
+						          return;
+					          }
+					          super.onAnimationEnd(view);
+					          ImageView transistorIv = mTransistor.get();
+					          ViewCompat.animate(transistorIv)
+					                    .translationX(mThumbnail.getLeft())
+					                    .translationY(mThumbnail.getTop())
+					                    .setInterpolator(new BakedBezierInterpolator())
+					                    .setDuration(ANIM_DURATION)
+					                    .start();
 				          }
-				          super.onAnimationEnd(view);
-				          ImageView transistorIv = mTransistor.get();
-				          ViewCompat.animate(transistorIv)
-				                    .translationX(mThumbnail.getLeft())
-				                    .translationY(mThumbnail.getTop())
-				                    .setInterpolator(new BakedBezierInterpolator())
-				                    .setDuration(ANIM_DURATION)
-				                    .start();
-			          }
-		          })
-		          .start();
+			          })
+			          .start();
 
-		ViewCompat.setPivotX(targetIv, targetIv.getRight());
-		ViewCompat.setPivotY(targetIv, targetIv.getBottom());
-		ViewCompat.animate(targetIv)
-		          .setDuration(ANIM_DURATION * 2)
-		          .scaleX(mWidthScale)
-		          .scaleY(mHeightScale)
-		          .translationX(mLeftDelta)
-		          .translationY(mTopDelta)
-		          .setInterpolator(new BakedBezierInterpolator())
-		          .setListener(listener)
-		          .start();
+			ViewCompat.setPivotX(targetIv, targetIv.getRight());
+			ViewCompat.setPivotY(targetIv, targetIv.getBottom());
+			ViewCompat.animate(targetIv)
+			          .setDuration(ANIM_DURATION * 2)
+			          .scaleX(mWidthScale)
+			          .scaleY(mHeightScale)
+			          .translationX(mLeftDelta)
+			          .translationY(mTopDelta)
+			          .setInterpolator(new BakedBezierInterpolator())
+			          .setListener(listener)
+			          .start();
 
 
-		ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0)
-		              .setDuration(ANIM_DURATION)
-		              .start();
+			ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0)
+			              .setDuration(ANIM_DURATION)
+			              .start();
+		}
 	}
 }

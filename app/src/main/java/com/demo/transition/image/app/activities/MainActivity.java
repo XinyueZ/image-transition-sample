@@ -15,9 +15,12 @@ import android.view.View;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
 import com.demo.transition.image.app.api.Api;
+import com.demo.transition.image.app.fragments.DetailFragment;
 import com.demo.transition.image.bus.ClickImageEvent;
+import com.demo.transition.image.bus.CloseDetailFragmentEvent;
 import com.demo.transition.image.bus.LoadImagesErrorEvent;
 import com.demo.transition.image.bus.LoadImagesSuccessEvent;
+import com.demo.transition.image.bus.PressBackEvent;
 import com.demo.transition.image.databinding.ActivityMainBinding;
 import com.demo.transition.image.ds.ImagesRequest;
 import com.demo.transition.image.ds.ImagesResponse;
@@ -70,6 +73,22 @@ public final class MainActivity extends BaseActivity {
 	 */
 	@Subscribe
 	public void onEvent(ClickImageEvent e) {
+
+//		Fragment targetFrg = DetailFragment.newInstance(e.getImage(), e.getThumbnail());
+//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//			targetFrg.setSharedElementEnterTransition(new PlatformTransition());
+//			targetFrg.setEnterTransition(new Fade());
+//			//setExitTransition(new Fade());
+//			targetFrg.setSharedElementReturnTransition(new PlatformTransition());
+//		}
+//		targetFrg.getChildFragmentManager()
+//		         .beginTransaction()
+//		         .addSharedElement(holder.image, "kittenImage")
+//		         .replace(R.id.coordinator_layout, targetFrg)
+//		         .addToBackStack(null)
+//		         .commit();
+
+
 		if (e.getThumbnail() != null) {
 			e.getThumbnail()
 			 .setSource(e.getImage()
@@ -79,12 +98,25 @@ public final class MainActivity extends BaseActivity {
 				DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
 				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_activity, Snackbar.LENGTH_SHORT).show();
 			} else {
-				DetailActivity2.showInstance(this, e.getImage(), e.getThumbnail());
+				getSupportFragmentManager()
+				         .beginTransaction()
+				         .add(R.id.coordinator_layout, DetailFragment.newInstance(e.getImage(), e.getThumbnail()))
+				         .addToBackStack(null)
+				         .commit();
 				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_fragment, Snackbar.LENGTH_SHORT).show();
 			}
 		}
 	}
 
+	/**
+	 * Handler for {@link PressBackEvent}.
+	 *
+	 * @param e Event {@link PressBackEvent}.
+	 */
+	@Subscribe
+	public void onEvent(PressBackEvent e) {
+		super.onBackPressed();
+	}
 	//------------------------------------------------
 
 
@@ -117,6 +149,17 @@ public final class MainActivity extends BaseActivity {
 		});
 
 		loadData();
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		if (!mOpenDetailActivity) {
+			EventBus.getDefault()
+			        .post(new CloseDetailFragmentEvent());
+		} else {
+			super.onBackPressed();
+		}
 	}
 
 	@Override

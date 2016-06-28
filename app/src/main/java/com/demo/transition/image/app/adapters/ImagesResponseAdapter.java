@@ -3,7 +3,7 @@ package com.demo.transition.image.app.adapters;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.os.Build;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,15 +74,13 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 
 		@SuppressWarnings("unused")
 		public void onImageItemClick(View v) {
-			Thumbnail thumbnail = null;
-
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-				ImageView imageView = (ImageView) v.findViewById(R.id.thumbnail_iv);
-				int[] screenLocation = new int[2];
-				imageView.getLocationOnScreen(screenLocation);
-				thumbnail = new Thumbnail(screenLocation[1], screenLocation[0], imageView.getWidth(), imageView.getHeight());
-			}
 			Image image = mBinding.getImage();
+			ImageView imageView = (ImageView) v.findViewById(R.id.thumbnail_iv);
+
+			int[] screenLocation = new int[2];
+			imageView.getLocationOnScreen(screenLocation);
+			Thumbnail thumbnail= new Thumbnail(screenLocation[1], screenLocation[0], imageView.getWidth(), imageView.getHeight());
+			ViewCompat.setTransitionName(mBinding.thumbnailIv,  image.getImageUrl().getNormal());
 			EventBus.getDefault()
 			        .post(new ClickImageEvent(image, thumbnail));
 		}

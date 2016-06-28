@@ -9,7 +9,7 @@ However under Lollipop we should do some tricks to make it "compat".
 
 #### Project with sampe codes, you can use what worth.
 
-My end product is fairly simple. We will be making an app that has a list of images with text, and when you click on an image the app will show a details screen. On Lollipop and above thanks to the transitions framework, the image from the list will animate into place on the details screen. 
+My end product is fairly simple. We will be making an app that has a list of images with text, and when you click on an image the app will show a details screen. On Lollipop and above thanks to the transitions framework, the image from the list will animate into place on the details screen.
 
 Under Lollipop we do followings:
 
@@ -17,11 +17,9 @@ Under Lollipop we do followings:
 
 - "transistor" as counterpart, a way to associate Views on the first screen to it  on the second screen "detail",  stays on detail view  before the "target" of detail view  will be opened, it helps us to make a smooth transition from "thumbnail" to "target".
 
-- If "thumbnail" provides "null", then use support-lib to make standard transition.
+- For case ```VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB && VERSION.SDK_INT <= VERSION_CODES.KITKAT``` the app use "compat" idea to do transition.
 
-- If "thumbnail" provides an original image on "list", then use "transit-compat" between HoneyComb and Kitkat.
-
-	- Under HoneyComb or beyond Lollipop, use support-lib to do.
+- Under HoneyComb or beyond Lollipop, use support-lib to do.
 
 - The "detail" can be shown by activity or fragment, you can select from menu on home-screen.
 
