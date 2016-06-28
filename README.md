@@ -6,13 +6,15 @@ image-transition-sample
 
 - "thumbnail" means meta-data from image-view on "list", inc. "left", "top", "width" and "height".
 
-- "transistor" stays on detail view  before the "target" of detail view  will be opened, it helps us to make a smooth transition from "thumbnail" to "target".
+- "transistor" as counterpart, a way to associate Views on the first screen to it  on the second screen "detail",  stays on detail view  before the "target" of detail view  will be opened, it helps us to make a smooth transition from "thumbnail" to "target".
 
 - If "thumbnail" provides "null", then use support-lib to make standard transition.
 
 - If "thumbnail" provides an original image on "list", then use "transit-compat" between HoneyComb and Kitkat.
 
 	- Under HoneyComb or beyond Lollipop, use support-lib to do.
+
+- The "detail" can be shown by activity or fragment, you can select from menu on home-screen.
 
 ## Code
 
