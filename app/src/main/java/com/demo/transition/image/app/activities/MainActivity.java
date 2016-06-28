@@ -95,7 +95,7 @@ public final class MainActivity extends BaseActivity {
 		});
 
 		setSupportActionBar(mBinding.toolbar);
-		mBinding.toolbar.setNavigationIcon(R.drawable.ic_menu);
+		mBinding.toolbar.setNavigationIcon(R.drawable.ic_close);
 		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
