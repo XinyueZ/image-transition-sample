@@ -3,11 +3,13 @@ package com.demo.transition.image.app.activities;
 import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.demo.transition.image.R;
@@ -35,6 +37,7 @@ public final class MainActivity extends BaseActivity {
 	private static final int LAYOUT = R.layout.activity_main;
 	private static final int MENU_MAIN = R.menu.menu_main;
 	private ActivityMainBinding mBinding;
+	private boolean mOpenDetailActivity;
 
 	//------------------------------------------------
 	//Subscribes, event-handlers
@@ -69,9 +72,16 @@ public final class MainActivity extends BaseActivity {
 	public void onEvent(ClickImageEvent e) {
 		if (e.getThumbnail() != null) {
 			e.getThumbnail()
-			 .setSource(e.getImage().getImageUrl()
-			                   .getNormal());
-			DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
+			 .setSource(e.getImage()
+			             .getImageUrl()
+			             .getNormal());
+			if (mOpenDetailActivity) {
+				DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
+				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_activity, Snackbar.LENGTH_SHORT).show();
+			} else {
+				DetailActivity2.showInstance(this, e.getImage(), e.getThumbnail());
+				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_fragment, Snackbar.LENGTH_SHORT).show();
+			}
 		}
 	}
 
@@ -81,13 +91,14 @@ public final class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mOpenDetailActivity = true;
 		mBinding = DataBindingUtil.setContentView(this, LAYOUT);
 		mBinding.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 		mBinding.setDividerDecoration(new DividerDecoration());
 
 		mBinding.activityMainSrl.setColorSchemeResources(R.color.colorPrimary, R.color.colorAccent, R.color.colorPrimaryDark, R.color.colorBlack);
 		mBinding.activityMainSrl.setProgressViewEndTarget(true, getActionBarHeight() * 2);
-		mBinding.activityMainSrl.setProgressViewOffset(false, 0,  getActionBarHeight() * 2);
+		mBinding.activityMainSrl.setProgressViewOffset(false, 0, getActionBarHeight() * 2);
 		mBinding.activityMainSrl.setRefreshing(true);
 		mBinding.activityMainSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 			@Override
@@ -112,6 +123,21 @@ public final class MainActivity extends BaseActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(MENU_MAIN, menu);
 		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.action_detail_activity:
+				mOpenDetailActivity = true;
+				item.setChecked(true);
+				break;
+			case R.id.action_detail_fragment:
+				mOpenDetailActivity = false;
+				item.setChecked(true);
+				break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void loadData() {

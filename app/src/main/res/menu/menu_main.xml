@@ -5,13 +5,10 @@
             android:id="@+id/action_detail_activity"
             android:icon="@drawable/ic_detail_activity"
             android:title="@string/action_detail_activity"
-            android:checkable="true"
             android:checked="true" >
         </item>
         <item
             android:id="@+id/action_detail_fragment"
-            android:checkable="true"
-            android:checked="false"
             android:icon="@drawable/ic_detail_fragment"
             android:title="@string/action_detail_fragment" >
         </item>

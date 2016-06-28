@@ -23,6 +23,10 @@
         <activity
             android:name=".app.activities.DetailActivity"
             android:parentActivityName=".app.activities.MainActivity"/>
+
+        <activity
+            android:name=".app.activities.DetailActivity2"
+            android:parentActivityName=".app.activities.MainActivity"/>
     </application>
 
 </manifest>

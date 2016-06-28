@@ -54,6 +54,7 @@ public final class DetailActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		mBinding = DataBindingUtil.setContentView(this, LAYOUT);
 		setSupportActionBar(mBinding.toolbar);
+
 		mBinding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
 		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
@@ -86,9 +87,9 @@ public final class DetailActivity extends BaseActivity {
 					mBinding.imageIv.getViewTreeObserver()
 					                .removeOnPreDrawListener(this);
 					mTransition = new TransitCompat.Builder(App.Instance).setThumbnail((Thumbnail) object)
-					                                         .setTarget(mBinding.imageIv)
-					                                         .setTransistor(mBinding.tempIv)
-					                                         .build(DetailActivity.this);
+					                                                     .setTarget(mBinding.imageIv)
+					                                                     .setTransistor(mBinding.tempIv)
+					                                                     .build(DetailActivity.this);
 					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
 						@Override
 						public void onAnimationEnd(View view) {
@@ -102,7 +103,6 @@ public final class DetailActivity extends BaseActivity {
 			});
 		}
 	}
-
 
 
 	@Override
