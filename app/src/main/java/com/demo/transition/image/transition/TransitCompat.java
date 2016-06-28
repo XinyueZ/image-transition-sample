@@ -16,23 +16,25 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import java.lang.ref.WeakReference;
+
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public final class TransitCompat {
 	/**
 	 * There is different between android pre 3.0 and 3.x, 4.x on this wording.
 	 */
-	public static final String ALPHA = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
-	                                   "alpha" :
-	                                   "Alpha";
+	private static final String ALPHA = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
+	                                    "alpha" :
+	                                    "Alpha";
 	private static final int ANIM_DURATION = 600;
 
 
-	private ColorDrawable mColorDrawable;
+	private final ColorDrawable mColorDrawable;
 
 	private Thumbnail mThumbnail;
-	private ImageView mTarget;
-	private ImageView mTransistor;
+	private WeakReference<ImageView> mTarget;
+	private WeakReference<ImageView> mTransistor;
 
 	private int mLeftDelta;
 	private int mTopDelta;
@@ -40,52 +42,56 @@ public final class TransitCompat {
 	private float mHeightScale;
 
 	public static class Builder {
-		private TransitCompat mTransition;
+		private final TransitCompat mTransit;
 
 		public Builder() {
-			mTransition = new TransitCompat();
+			mTransit = new TransitCompat();
 		}
 
 
 		public Builder setThumbnail(Thumbnail thumbnail) {
-			mTransition.mThumbnail = thumbnail;
+			mTransit.mThumbnail = thumbnail;
 			return this;
 		}
 
 		public Builder setTarget(ImageView target) {
-			mTransition.mTarget = target;
+			mTransit.mTarget = new WeakReference<>(target);
 			return this;
 		}
 
 
 		public Builder setTransistor(ImageView transistor) {
-			mTransition.mTransistor = transistor;
+			mTransit.mTransistor = new WeakReference<>(transistor);
 			return this;
 		}
 
 
 		public TransitCompat build(Context cxt) {
+			if (mTransit.mTarget.get() == null) {
+				return null;
+			}
+			ImageView targetIv = mTransit.mTarget.get();
 			Glide.with(cxt)
-			     .load(mTransition.mThumbnail.getSource())
+			     .load(mTransit.mThumbnail.getSource())
 			     .diskCacheStrategy(DiskCacheStrategy.ALL)
-			     .into(mTransition.mTarget);
+			     .into(targetIv);
 
 			// Figure out where the thumbnail and full size versions are, relative
 			// to the screen and each other
 			int[] screenLocation = new int[2];
-			mTransition.mTarget.getLocationOnScreen(screenLocation);
-			mTransition.mLeftDelta = mTransition.mThumbnail.getLeft() - screenLocation[0];
-			mTransition.mTopDelta = mTransition.mThumbnail.getTop() - screenLocation[1];
+			targetIv.getLocationOnScreen(screenLocation);
+			mTransit.mLeftDelta = mTransit.mThumbnail.getLeft() - screenLocation[0];
+			mTransit.mTopDelta = mTransit.mThumbnail.getTop() - screenLocation[1];
 
 			// Scale factors to make the large version the same size as the thumbnail
-			mTransition.mWidthScale = (float) mTransition.mThumbnail.getWidth() / mTransition.mTarget.getWidth();
-			mTransition.mHeightScale = (float) mTransition.mThumbnail.getHeight() / mTransition.mTarget.getHeight();
+			mTransit.mWidthScale = (float) mTransit.mThumbnail.getWidth() / targetIv.getWidth();
+			mTransit.mHeightScale = (float) mTransit.mThumbnail.getHeight() / targetIv.getHeight();
 
-			return mTransition;
+			return mTransit;
 		}
 	}
 
-	public TransitCompat() {
+	private TransitCompat() {
 		mColorDrawable = new ColorDrawable(Color.BLACK);
 	}
 
@@ -95,20 +101,29 @@ public final class TransitCompat {
 	 * @param listener For end of animation.
 	 */
 	public void enter(final ViewPropertyAnimatorListener listener) {
-		ViewCompat.setY(mTransistor, mThumbnail.getTop());
-		mTransistor.getLayoutParams().width = mThumbnail.getWidth();
-		mTransistor.getLayoutParams().height = mThumbnail.getHeight();
+		if (mTransistor.get() == null) {
+			return;
+		}
+		ImageView transistorIv = mTransistor.get();
+		if (mTarget.get() == null) {
+			return;
+		}
+		ImageView targetIv = mTarget.get();
 
-		int transistorStartX = mTarget.getWidth() - mThumbnail.getWidth();
-		int transistorStartY = mTarget.getBottom() - mThumbnail.getHeight();
-		ViewCompat.setPivotX(mTarget, mTarget.getWidth());
-		ViewCompat.setPivotY(mTarget, mTarget.getBottom());
-		ViewCompat.setScaleX(mTarget, mWidthScale);
-		ViewCompat.setScaleY(mTarget, mHeightScale);
-		ViewCompat.setTranslationX(mTarget, mLeftDelta);
-		ViewCompat.setTranslationY(mTarget, mTopDelta);
+		ViewCompat.setY(transistorIv, mThumbnail.getTop());
+		transistorIv.getLayoutParams().width = mThumbnail.getWidth();
+		transistorIv.getLayoutParams().height = mThumbnail.getHeight();
 
-		ViewCompat.animate(mTransistor)
+		int transistorStartX = targetIv.getWidth() - mThumbnail.getWidth();
+		int transistorStartY = targetIv.getBottom() - mThumbnail.getHeight();
+		ViewCompat.setPivotX(targetIv, targetIv.getWidth());
+		ViewCompat.setPivotY(targetIv, targetIv.getBottom());
+		ViewCompat.setScaleX(targetIv, mWidthScale);
+		ViewCompat.setScaleY(targetIv, mHeightScale);
+		ViewCompat.setTranslationX(targetIv, mLeftDelta);
+		ViewCompat.setTranslationY(targetIv, mTopDelta);
+
+		ViewCompat.animate(transistorIv)
 		          .setDuration(ANIM_DURATION * 2)
 		          .translationX(transistorStartX)
 		          .translationY(transistorStartY)
@@ -116,11 +131,20 @@ public final class TransitCompat {
 		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
 			          @Override
 			          public void onAnimationEnd(View view) {
-				          ViewCompat.animate(mTransistor)
+				          if (mTransistor.get() == null) {
+					          return;
+				          }
+				          ImageView transistorIv = mTransistor.get();
+				          if (mTarget.get() == null) {
+					          return;
+				          }
+				          super.onAnimationEnd(view);
+				          ImageView targetIv = mTarget.get();
+				          ViewCompat.animate(transistorIv)
 				                    .alpha(0)
 				                    .setDuration(ANIM_DURATION)
 				                    .start();
-				          ViewCompat.animate(mTarget)
+				          ViewCompat.animate(targetIv)
 				                    .setDuration(ANIM_DURATION)
 				                    .scaleX(1)
 				                    .scaleY(1)
@@ -143,26 +167,39 @@ public final class TransitCompat {
 	 * size/location as relieved from bundle.
 	 */
 	public void exit(final ViewPropertyAnimatorListener listener) {
-		ViewCompat.animate(mTransistor)
+		if (mTransistor.get() == null) {
+			return;
+		}
+		ImageView transistorIv = mTransistor.get();
+		if (mTarget.get() == null) {
+			return;
+		}
+		ImageView targetIv = mTarget.get();
+		ViewCompat.animate(transistorIv)
 		          .setDuration(ANIM_DURATION / 2)
 		          .alpha(1)
 		          .setInterpolator(new BakedBezierInterpolator())
 		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
 			          @Override
 			          public void onAnimationEnd(View view) {
+				          if (mTransistor.get() == null) {
+					          return;
+				          }
 				          super.onAnimationEnd(view);
-				          ViewCompat.animate(mTransistor)
+				          ImageView transistorIv = mTransistor.get();
+				          ViewCompat.animate(transistorIv)
 				                    .translationX(mThumbnail.getLeft())
 				                    .translationY(mThumbnail.getTop())
 				                    .setInterpolator(new BakedBezierInterpolator())
-				                    .setDuration(ANIM_DURATION).start();
+				                    .setDuration(ANIM_DURATION)
+				                    .start();
 			          }
 		          })
 		          .start();
 
-		ViewCompat.setPivotX(mTarget, mTarget.getRight());
-		ViewCompat.setPivotY(mTarget, mTarget.getBottom());
-		ViewCompat.animate(mTarget)
+		ViewCompat.setPivotX(targetIv, targetIv.getRight());
+		ViewCompat.setPivotY(targetIv, targetIv.getBottom());
+		ViewCompat.animate(targetIv)
 		          .setDuration(ANIM_DURATION * 2)
 		          .scaleX(mWidthScale)
 		          .scaleY(mHeightScale)
