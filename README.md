@@ -9,6 +9,10 @@ However under Lollipop we should do some tricks to make it "compat".
 
 #### Project with sampe codes, you can use what worth.
 
+My end product is fairly simple. We will be making an app that has a list of images with text, and when you click on an image the app will show a details screen. On Lollipop and above thanks to the transitions framework, the image from the grid will animate into place on the details screen. 
+
+Under Lollipop we do followings:
+
 - "thumbnail" means meta-data from image-view on "list", inc. "left", "top", "width" and "height".
 
 - "transistor" stays on detail view  before the "target" of detail view  will be opened, it helps us to make a smooth transition from "thumbnail" to "target".
