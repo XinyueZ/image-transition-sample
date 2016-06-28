@@ -2,7 +2,16 @@ image-transition-sample
 ====
 
 ## Learning how to make transitions on images, objects to show "list"-"detail".
-#### Project is sampe codes, you can use what worth.
+
+One of the cornerstones of Material design is meaningful motion between screens. Lollipop introduced support for these animations in the form of the transitions framework, which allows us to animate transitions between Activities and Fragments.
+
+However under Lollipop we should do some tricks to make it "compat".
+
+#### Project with sampe codes, you can use what worth.
+
+My end product is fairly simple. We will be making an app that has a list of images with text, and when you click on an image the app will show a details screen. On Lollipop and above thanks to the transitions framework, the image from the list will animate into place on the details screen. 
+
+Under Lollipop we do followings:
 
 - "thumbnail" means meta-data from image-view on "list", inc. "left", "top", "width" and "height".
 
