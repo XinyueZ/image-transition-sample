@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.demo.transition.image.R;
+import com.demo.transition.image.app.App;
 import com.demo.transition.image.databinding.ActivityDetailBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.Thumbnail;
@@ -84,7 +85,7 @@ public final class DetailActivity extends BaseActivity {
 					Object object = intent.getSerializableExtra(EXTRAS_THUMBNAIL);
 					mBinding.imageIv.getViewTreeObserver()
 					                .removeOnPreDrawListener(this);
-					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
+					mTransition = new TransitCompat.Builder(App.Instance).setThumbnail((Thumbnail) object)
 					                                         .setTarget(mBinding.imageIv)
 					                                         .setTransistor(mBinding.tempIv)
 					                                         .build(DetailActivity.this);

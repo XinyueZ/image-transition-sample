@@ -4,12 +4,14 @@ package com.demo.transition.image.transition;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -41,11 +43,16 @@ public final class TransitCompat {
 	private float mWidthScale;
 	private float mHeightScale;
 
+	private float mEdgeGap = 0f; //The gap between mTransistor to right of device.
+
 	public static class Builder {
 		private final TransitCompat mTransit;
 
-		public Builder() {
+		public Builder(Context cxt) {
 			mTransit = new TransitCompat();
+
+			Resources r = cxt.getResources();
+			mTransit.mEdgeGap = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, r.getDisplayMetrics());
 		}
 
 
@@ -114,10 +121,10 @@ public final class TransitCompat {
 		transistorIv.getLayoutParams().width = mThumbnail.getWidth();
 		transistorIv.getLayoutParams().height = mThumbnail.getHeight();
 
-		int transistorStartX = targetIv.getWidth() - mThumbnail.getWidth();
+		int transistorStartX = targetIv.getWidth() - mThumbnail.getWidth() - (int) mEdgeGap;
 		int transistorStartY = targetIv.getBottom() - mThumbnail.getHeight();
-		ViewCompat.setPivotX(targetIv, targetIv.getWidth());
-		ViewCompat.setPivotY(targetIv, targetIv.getBottom());
+		ViewCompat.setPivotX(targetIv, targetIv.getWidth() - targetIv.getWidth() / 2 - (int) mEdgeGap);
+		ViewCompat.setPivotY(targetIv, targetIv.getBottom() - targetIv.getBottom() / 2);
 		ViewCompat.setScaleX(targetIv, mWidthScale);
 		ViewCompat.setScaleY(targetIv, mHeightScale);
 		ViewCompat.setTranslationX(targetIv, mLeftDelta);
@@ -135,27 +142,33 @@ public final class TransitCompat {
 					          return;
 				          }
 				          ImageView transistorIv = mTransistor.get();
-				          if (mTarget.get() == null) {
-					          return;
-				          }
 				          super.onAnimationEnd(view);
-				          ImageView targetIv = mTarget.get();
 				          ViewCompat.animate(transistorIv)
 				                    .alpha(0)
 				                    .setDuration(ANIM_DURATION)
+				                    .setListener(new ViewPropertyAnimatorListenerAdapter() {
+					                    @Override
+					                    public void onAnimationStart(View view) {
+						                    super.onAnimationEnd(view);
+						                    if (mTarget.get() == null) {
+							                    return;
+						                    }
+						                    ImageView targetIv = mTarget.get();
+						                    ViewCompat.animate(targetIv)
+						                              .setDuration(ANIM_DURATION)
+						                              .scaleX(1)
+						                              .scaleY(1)
+						                              .translationX(0)
+						                              .translationY(0)
+						                              .setInterpolator(new BakedBezierInterpolator())
+						                              .setListener(listener)
+						                              .start();
+						                    ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
+						                                  .setDuration(ANIM_DURATION)
+						                                  .start();
+					                    }
+				                    })
 				                    .start();
-				          ViewCompat.animate(targetIv)
-				                    .setDuration(ANIM_DURATION)
-				                    .scaleX(1)
-				                    .scaleY(1)
-				                    .translationX(0)
-				                    .translationY(0)
-				                    .setInterpolator(new BakedBezierInterpolator())
-				                    .setListener(listener)
-				                    .start();
-				          ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
-				                        .setDuration(ANIM_DURATION)
-				                        .start();
 			          }
 		          })
 		          .start();
