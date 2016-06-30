@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.demo.transition.image.R;
 import com.demo.transition.image.bus.ClickImageEvent;
@@ -24,7 +23,8 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 	 * Main layout for this component.
 	 */
 	private static final int ITEM_LAYOUT = R.layout.item_list_images;
-	private final ImagesResponse mImagesResponse;
+	private  ImagesResponse mImagesResponse;
+
 
 
 	public ImagesResponseAdapter(ImagesResponse imagesResponse) {
@@ -40,6 +40,7 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 		                      .size();
 	}
 
+
 	@Override
 	public ImagesListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		Context cxt = parent.getContext();
@@ -50,11 +51,13 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 
 	@Override
 	public void onBindViewHolder(ImagesListItemViewHolder holder, int position) {
-		holder.mBinding.setHandler(new ImagesListItemHandler(holder.mBinding));
+		holder.mBinding.setHandler(new ImagesListItemHandler(holder));
 		holder.mBinding.setImage(mImagesResponse.getResult()
-		                                        .get(position));
+		                                        .get(holder.getAdapterPosition()));
 		holder.mBinding.executePendingBindings();
 	}
+
+
 
 	static class ImagesListItemViewHolder extends RecyclerView.ViewHolder {
 		private final ListImagesItemBinding mBinding;
@@ -66,23 +69,24 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 	}
 
 	public static class ImagesListItemHandler {
-		private final ListImagesItemBinding mBinding;
+		private final ImagesListItemViewHolder mHolder;
 
-		ImagesListItemHandler(ListImagesItemBinding binding) {
-			mBinding = binding;
+
+		ImagesListItemHandler(ImagesListItemViewHolder holder) {
+			mHolder = holder;
 		}
 
 		@SuppressWarnings("unused")
 		public void onImageItemClick(View v) {
-			Image image = mBinding.getImage();
-			ImageView imageView = (ImageView) v.findViewById(R.id.thumbnail_iv);
+			ListImagesItemBinding binding = mHolder.mBinding;
+			Image image = binding.getImage();
 
 			int[] screenLocation = new int[2];
-			imageView.getLocationOnScreen(screenLocation);
-			Thumbnail thumbnail= new Thumbnail(screenLocation[1], screenLocation[0], imageView.getWidth(), imageView.getHeight());
-			ViewCompat.setTransitionName(mBinding.thumbnailIv,  image.getImageUrl().getNormal());
+			binding.thumbnailIv.getLocationOnScreen(screenLocation);
+			Thumbnail thumbnail = new Thumbnail(screenLocation[1], screenLocation[0], binding.thumbnailIv.getWidth(), binding.thumbnailIv.getHeight());
+			ViewCompat.setTransitionName(binding.thumbnailIv, "image_" + mHolder.getAdapterPosition());
 			EventBus.getDefault()
-			        .post(new ClickImageEvent(image, thumbnail));
+			        .post(new ClickImageEvent(image, thumbnail, binding.thumbnailIv));
 		}
 	}
 }

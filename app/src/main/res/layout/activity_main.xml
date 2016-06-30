@@ -1,83 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.demo.transition.image.app.activities.MainActivity">
 
     <data class="ActivityMainBinding">
 
-        <variable
-            name="imagesResponse"
-            type="com.demo.transition.image.ds.ImagesResponse"/>
 
-        <variable
-            name="layoutManager"
-            type="android.support.v7.widget.RecyclerView.LayoutManager"/>
-
-        <variable
-            name="dividerDecoration"
-            type="com.demo.transition.image.app.activities.MainActivity.DividerDecoration"/>
     </data>
 
 
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/coordinator_layout"
+    <FrameLayout
+        android:id="@+id/main_fl"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorWhite">
-
-
-        <android.support.design.widget.AppBarLayout
-            style="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            elevation="@dimen/ab_elevation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/ThemeOverlay.AppCompat.Light"
-                elevation="@dimen/ab_elevation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fitsSystemWindows="true"
-                app:layout_scrollFlags="scroll|enterAlways|snap"/>
-
-        </android.support.design.widget.AppBarLayout>
-
-
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/activity_main_srl"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            >
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/activity_main"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-
-                <android.support.v7.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    app:decoration="@{dividerDecoration}"
-                    app:imagesResponse="@{imagesResponse}"
-                    app:layoutManager="@{layoutManager}"
-                    app:layout_constraintBottom_toBottomOf="@+id/activity_main"
-                    app:layout_constraintLeft_toLeftOf="@+id/activity_main"
-                    app:layout_constraintRight_toRightOf="@+id/activity_main"
-                    app:layout_constraintTop_toTopOf="@+id/activity_main"/>
-            </android.support.constraint.ConstraintLayout>
-        </android.support.v4.widget.SwipeRefreshLayout>
-
-
-    </android.support.design.widget.CoordinatorLayout>
+        android:layout_height="match_parent"
+        android:background="@color/colorWhite"/>
 
 </layout>

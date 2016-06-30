@@ -5,7 +5,7 @@
             android:id="@+id/action_detail_activity"
             android:icon="@drawable/ic_detail_activity"
             android:title="@string/action_detail_activity"
-            android:checked="true" >
+             >
         </item>
         <item
             android:id="@+id/action_detail_fragment"

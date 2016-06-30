@@ -11,16 +11,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
-import com.demo.transition.image.app.adapters.ImagesResponseAdapter;
-import com.demo.transition.image.ds.ImagesResponse;
 
 public final class ImageViewBindingHelper {
 
 	@BindingAdapter({ "imageUrl"  })
 	public static void setImageLoader(ImageView imageView, String imageUrl ) {
+		AnimatedVectorDrawableCompat dr = (AnimatedVectorDrawableCompat) imageView.getDrawable();
+		VectorDrawableCompat errorDrawableCompat = VectorDrawableCompat.create(App.Instance.getResources(), R.drawable.ic_panorama, null);
 		Glide.with(App.Instance)
 		     .load(imageUrl)
 		     .dontAnimate()
+		     .error(errorDrawableCompat)
 		     .diskCacheStrategy(DiskCacheStrategy.ALL)
 		     .centerCrop()
 		     .into(imageView);
@@ -29,40 +30,24 @@ public final class ImageViewBindingHelper {
 
 
 
-	@BindingAdapter({ "imageUrl",
-	                  "isThumbnail" })
-	public static void setImageLoader(ImageView imageView, String imageUrl, boolean isThumbnail) {
+	@BindingAdapter({ "thumbnailUrl"} )
+	public static void setThumbnailLoader(ImageView imageView, String thumbnailUrl) {
 		AnimatedVectorDrawableCompat animatedVectorDrawableCompat = AnimatedVectorDrawableCompat.create(App.Instance, R.drawable.ic_animated_download);
 		imageView.setImageDrawable(animatedVectorDrawableCompat);
 		AnimatedVectorDrawableCompat dr = (AnimatedVectorDrawableCompat) imageView.getDrawable();
 		VectorDrawableCompat errorDrawableCompat = VectorDrawableCompat.create(App.Instance.getResources(), R.drawable.ic_panorama, null);
 		dr.start();
-		if (!isThumbnail) {
-			Glide.with(App.Instance)
-			     .load(imageUrl)
-			     .placeholder(dr)
-			     .dontAnimate()
-			     .error(errorDrawableCompat)
-			     .diskCacheStrategy(DiskCacheStrategy.ALL)
-			     .into(imageView);
-		} else {
-			Glide.with(App.Instance)
-			     .load(imageUrl)
-			     .placeholder(dr)
-			     .dontAnimate()
-			     .error(errorDrawableCompat)
-			     .diskCacheStrategy(DiskCacheStrategy.ALL)
-			     .centerCrop()
-			     .into(imageView);
-		}
+
+		Glide.with(App.Instance)
+		     .load(thumbnailUrl)
+		     .placeholder(dr)
+		     .dontAnimate()
+		     .error(errorDrawableCompat)
+		     .diskCacheStrategy(DiskCacheStrategy.ALL)
+		     .into(imageView);
 	}
 
 
-
-	@BindingAdapter({ "imagesResponse" })
-	public static void setRecyclerData(RecyclerView rv, ImagesResponse response) {
-		rv.setAdapter(new ImagesResponseAdapter(response));
-	}
 
 	@BindingAdapter({ "decoration" })
 	public static void setRecyclerDecoration(RecyclerView rv, RecyclerView.ItemDecoration decoration) {

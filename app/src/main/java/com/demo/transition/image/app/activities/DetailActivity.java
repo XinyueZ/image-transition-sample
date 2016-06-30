@@ -4,8 +4,11 @@ package com.demo.transition.image.app.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.widget.ShareActionProvider;
@@ -15,8 +18,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.demo.transition.image.R;
-import com.demo.transition.image.app.App;
-import com.demo.transition.image.databinding.ActivityDetailBinding;
+import com.demo.transition.image.databinding.LayoutDetailBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.Thumbnail;
 import com.demo.transition.image.transition.TransitCompat;
@@ -28,12 +30,12 @@ import static android.os.Bundle.EMPTY;
 public final class DetailActivity extends BaseActivity {
 	private static final String EXTRAS_IMAGE = DetailActivity.class.getName() + ".EXTRAS.image";
 	private static final String EXTRAS_THUMBNAIL = DetailActivity.class.getName() + ".EXTRAS.thumbnail";
-	private static final int LAYOUT = R.layout.activity_detail;
+	private static final int LAYOUT = R.layout.layout_detail;
 	private static final int MENU_DETAIL = R.menu.menu_detail;
-	private ActivityDetailBinding mBinding;
+	private LayoutDetailBinding mBinding;
 	private TransitCompat mTransition;
 
-	static void showInstance(Activity cxt, Image image, Thumbnail thumbnail) {
+	public static void showInstance(Activity cxt, Image image, Thumbnail thumbnail) {
 		Intent intent = new Intent(cxt, DetailActivity.class);
 		intent.putExtra(EXTRAS_IMAGE, image);
 		intent.putExtra(EXTRAS_THUMBNAIL, thumbnail);
@@ -42,11 +44,12 @@ public final class DetailActivity extends BaseActivity {
 	}
 
 
-	static void showInstance(Activity cxt, Image image) {
+	public static void showInstance(Activity cxt, Image image, Thumbnail thumbnail , ActivityOptionsCompat options) {
 		Intent intent = new Intent(cxt, DetailActivity.class);
 		intent.putExtra(EXTRAS_IMAGE, image);
+		intent.putExtra(EXTRAS_THUMBNAIL, thumbnail);
 		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		ActivityCompat.startActivity(cxt, intent, EMPTY);
+		ActivityCompat.startActivity(cxt, intent, options.toBundle());
 	}
 
 	@Override
@@ -68,7 +71,14 @@ public final class DetailActivity extends BaseActivity {
 		setTitle(image.getTitle());
 
 		mBinding.setImage(image);
-		transitCompat();
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			transitCompat();
+		}else {
+			mBinding.tempIv.setVisibility(View.GONE);
+		}
+		Snackbar.make(mBinding.detailRootCl, R.string.action_detail_activity, Snackbar.LENGTH_SHORT)
+		        .show();
 	}
 
 
@@ -86,18 +96,11 @@ public final class DetailActivity extends BaseActivity {
 					Object object = intent.getSerializableExtra(EXTRAS_THUMBNAIL);
 					mBinding.imageIv.getViewTreeObserver()
 					                .removeOnPreDrawListener(this);
-					mTransition = new TransitCompat.Builder(App.Instance).setThumbnail((Thumbnail) object)
+					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
 					                                                     .setTarget(mBinding.imageIv)
 					                                                     .setTransistor(mBinding.tempIv)
 					                                                     .build(DetailActivity.this);
-					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(View view) {
-							super.onAnimationEnd(view);
-							mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
-							mBinding.detailAppBar.setBackgroundResource(R.color.colorPrimary);
-						}
-					});
+					mTransition.enter(new ViewPropertyAnimatorListenerAdapter());
 					return true;
 				}
 			});
@@ -123,7 +126,7 @@ public final class DetailActivity extends BaseActivity {
 				}
 			});
 		} else {
-			super.onBackPressed();
+			ActivityCompat.finishAfterTransition(DetailActivity.this);
 		}
 	}
 
@@ -131,7 +134,7 @@ public final class DetailActivity extends BaseActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(MENU_DETAIL, menu);
-		MenuItem item = menu.findItem(R.id.menu_item_share);
+		MenuItem item = menu.findItem(R.id.action_share);
 		ShareActionProvider myShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 		Intent myShareIntent = new Intent(Intent.ACTION_SEND);
 		myShareIntent.setType("text/plain");

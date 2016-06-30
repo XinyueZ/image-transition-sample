@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">ImageTransitionSample</string>
-    <string name="api_images">http://nasapicapp-dev-0.appspot.com/</string>
+    <string name="api_images">http://nasapicapp-dev-1.appspot.com/</string>
     <string name="share">Share</string>
     <string name="action_detail_activity">Detail with activity</string>
     <string name="action_detail_fragment">Detail with fragment</string>

@@ -1,70 +1,47 @@
 package com.demo.transition.image.app.activities;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
+import android.transition.Fade;
 
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
-import com.demo.transition.image.app.api.Api;
 import com.demo.transition.image.app.fragments.DetailFragment;
+import com.demo.transition.image.app.fragments.MainFragment;
 import com.demo.transition.image.bus.ClickImageEvent;
-import com.demo.transition.image.bus.CloseDetailFragmentEvent;
-import com.demo.transition.image.bus.LoadImagesErrorEvent;
-import com.demo.transition.image.bus.LoadImagesSuccessEvent;
-import com.demo.transition.image.bus.PressBackEvent;
-import com.demo.transition.image.databinding.ActivityMainBinding;
-import com.demo.transition.image.ds.ImagesRequest;
-import com.demo.transition.image.ds.ImagesResponse;
+import com.demo.transition.image.bus.PopUpDetailFragmentEvent;
+import com.demo.transition.image.transition.v21.PlatformTransition;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Calendar;
-import java.util.UUID;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import static com.demo.transition.image.app.App.KEY_OPEN_DETAIL_ACTIVITY;
+import static com.demo.transition.image.app.App.PREFS;
 
 public final class MainActivity extends BaseActivity {
 
 	private static final int LAYOUT = R.layout.activity_main;
-	private static final int MENU_MAIN = R.menu.menu_main;
-	private ActivityMainBinding mBinding;
-	private boolean mOpenDetailActivity;
+	private static final int MAIN_CONTAINER = R.id.main_fl;
+	private Fragment mMainFragment;
 
 	//------------------------------------------------
 	//Subscribes, event-handlers
 	//------------------------------------------------
 
 	/**
-	 * Handler for {@link LoadImagesSuccessEvent}.
+	 * Handler for {@link PopUpDetailFragmentEvent}.
 	 *
-	 * @param e Event {@link LoadImagesSuccessEvent}.
+	 * @param e Event {@link PopUpDetailFragmentEvent}.
 	 */
 	@Subscribe
-	public void onEvent(LoadImagesSuccessEvent e) {
-		mBinding.setImagesResponse(e.getImagesResponse());
+	public void onEvent(@SuppressWarnings("UnusedParameters") PopUpDetailFragmentEvent e) {
+		super.onBackPressed();
 	}
 
-	/**
-	 * Handler for {@link LoadImagesErrorEvent}.
-	 *
-	 * @param e Event {@link LoadImagesErrorEvent}.
-	 */
-	@Subscribe
-	public void onEvent(@SuppressWarnings("UnusedParameters") LoadImagesErrorEvent e) {
-
-	}
 
 	/**
 	 * Handler for {@link  ClickImageEvent}.
@@ -73,49 +50,48 @@ public final class MainActivity extends BaseActivity {
 	 */
 	@Subscribe
 	public void onEvent(ClickImageEvent e) {
-
-//		Fragment targetFrg = DetailFragment.newInstance(e.getImage(), e.getThumbnail());
-//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//			targetFrg.setSharedElementEnterTransition(new PlatformTransition());
-//			targetFrg.setEnterTransition(new Fade());
-//			//setExitTransition(new Fade());
-//			targetFrg.setSharedElementReturnTransition(new PlatformTransition());
-//		}
-//		targetFrg.getChildFragmentManager()
-//		         .beginTransaction()
-//		         .addSharedElement(holder.image, "kittenImage")
-//		         .replace(R.id.coordinator_layout, targetFrg)
-//		         .addToBackStack(null)
-//		         .commit();
-
-
 		if (e.getThumbnail() != null) {
+			boolean currentOpenDetailActivity = App.Instance.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+			                                                .getBoolean(KEY_OPEN_DETAIL_ACTIVITY, App.DEFAULT_OPEN_DETAIL_ACTIVITY);
 			e.getThumbnail()
 			 .setSource(e.getImage()
 			             .getImageUrl()
 			             .getNormal());
-			if (mOpenDetailActivity) {
-				DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
-				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_activity, Snackbar.LENGTH_SHORT).show();
+
+
+			if (currentOpenDetailActivity) {
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+					DetailActivity.showInstance(this, e.getImage(), e.getThumbnail());
+				} else {
+					String transitionName = ViewCompat.getTransitionName(e.getSharedImageView());
+					ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, e.getSharedImageView(), "shareName");
+					DetailActivity.showInstance(this, e.getImage(), e.getThumbnail(), options);
+				}
 			} else {
-				getSupportFragmentManager()
-				         .beginTransaction()
-				         .add(R.id.coordinator_layout, DetailFragment.newInstance(e.getImage(), e.getThumbnail()))
-				         .addToBackStack(null)
-				         .commit();
-				Snackbar.make(mBinding.coordinatorLayout, R.string.action_detail_fragment, Snackbar.LENGTH_SHORT).show();
+
+				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+					Fragment targetFrg = DetailFragment.newInstance(e.getImage(), e.getThumbnail());
+					getSupportFragmentManager().beginTransaction()
+					                           .add(MAIN_CONTAINER, targetFrg)
+					                           .addToBackStack(null)
+					                           .commit();
+				} else {
+					String transitionName = ViewCompat.getTransitionName(e.getSharedImageView());
+					Fragment targetFrg = DetailFragment.newInstance(e.getImage(), e.getThumbnail(), transitionName);
+
+					targetFrg.setSharedElementEnterTransition(new PlatformTransition());
+					targetFrg.setEnterTransition(new Fade());
+					mMainFragment.setExitTransition(new Fade());
+					targetFrg.setSharedElementReturnTransition(new PlatformTransition());
+
+					getSupportFragmentManager().beginTransaction()
+					                           .addSharedElement(e.getSharedImageView(), transitionName)
+					                           .replace(MAIN_CONTAINER, targetFrg)
+					                           .addToBackStack(null)
+					                           .commit();
+				}
 			}
 		}
-	}
-
-	/**
-	 * Handler for {@link PressBackEvent}.
-	 *
-	 * @param e Event {@link PressBackEvent}.
-	 */
-	@Subscribe
-	public void onEvent(PressBackEvent e) {
-		super.onBackPressed();
 	}
 	//------------------------------------------------
 
@@ -123,127 +99,26 @@ public final class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mOpenDetailActivity = true;
-		mBinding = DataBindingUtil.setContentView(this, LAYOUT);
-		mBinding.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-		mBinding.setDividerDecoration(new DividerDecoration());
-
-		mBinding.activityMainSrl.setColorSchemeResources(R.color.colorPrimary, R.color.colorAccent, R.color.colorPrimaryDark, R.color.colorBlack);
-		mBinding.activityMainSrl.setProgressViewEndTarget(true, getActionBarHeight() * 2);
-		mBinding.activityMainSrl.setProgressViewOffset(false, 0, getActionBarHeight() * 2);
-		mBinding.activityMainSrl.setRefreshing(true);
-		mBinding.activityMainSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-			@Override
-			public void onRefresh() {
-				loadData();
-			}
-		});
-
-		setSupportActionBar(mBinding.toolbar);
-		mBinding.toolbar.setNavigationIcon(R.drawable.ic_close);
-		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				ActivityCompat.finishAfterTransition(MainActivity.this);
-			}
-		});
-
-		loadData();
+		DataBindingUtil.setContentView(this, LAYOUT);
+		getSupportFragmentManager().beginTransaction()
+		                           .add(MAIN_CONTAINER, mMainFragment = MainFragment.newInstance())
+		                           .commit();
 	}
 
 
-	@Override
-	public void onBackPressed() {
-		if (!mOpenDetailActivity) {
-			EventBus.getDefault()
-			        .post(new CloseDetailFragmentEvent());
-		} else {
-			super.onBackPressed();
-		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(MENU_MAIN, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.action_detail_activity:
-				mOpenDetailActivity = true;
-				item.setChecked(true);
-				break;
-			case R.id.action_detail_fragment:
-				mOpenDetailActivity = false;
-				item.setChecked(true);
-				break;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
-	private void loadData() {
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int currentMonth = calendar.get(Calendar.MONTH);
-		int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-		int shownMonth = currentMonth + 1;
-		String timeZone = calendar.getTimeZone()
-		                          .getID();
-		loadPhotoList(year, shownMonth, timeZone);
-		if (currentDay < 15) {
-			loadPhotoList(year, currentMonth, timeZone);
-		}
-	}
-
-
-	private void loadPhotoList(int year, int month, String timeZone) {
-		ImagesRequest req = new ImagesRequest();
-		req.setReqId(UUID.randomUUID()
-		                 .toString());
-		req.setYear(year);
-		req.setMonth(month);
-		req.setTimeZone(timeZone);
-
-		Api api = App.Retrofit.create(Api.class);
-		Call<ImagesResponse> call = api.getPhotoMonthList(req);
-		call.enqueue(new Callback<ImagesResponse>() {
-			@Override
-			public void onResponse(Call<ImagesResponse> call, Response<ImagesResponse> response) {
-				if (response.isSuccessful()) {
-					EventBus.getDefault()
-					        .post(new LoadImagesSuccessEvent(response.body()));
-				} else {
-					EventBus.getDefault()
-					        .post(new LoadImagesErrorEvent());
-				}
-				mBinding.activityMainSrl.setRefreshing(false);
-			}
-
-			@Override
-			public void onFailure(Call<ImagesResponse> call, Throwable t) {
-				EventBus.getDefault()
-				        .post(new LoadImagesErrorEvent());
-				mBinding.activityMainSrl.setRefreshing(false);
-			}
-		});
-	}
-
-
-	public static class DividerDecoration extends RecyclerView.ItemDecoration {
-		@Override
-		public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-			super.getItemOffsets(outRect, view, parent, state);
-			if (!shouldDrawDividerAbove(view, parent)) {
-				outRect.top = App.Instance.getResources()
-				                          .getDimensionPixelOffset(R.dimen.divide_height);
-			}
-		}
-
-		private boolean shouldDrawDividerAbove(View view, RecyclerView parent) {
-			final RecyclerView.ViewHolder holder = parent.getChildViewHolder(view);
-			return holder.getAdapterPosition() == 0;
-		}
-	}
+//	@Override
+//	public void onBackPressed() {
+//		boolean currentOpenDetailActivity = App.Instance.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+//		                                                .getBoolean(KEY_OPEN_DETAIL_ACTIVITY, App.DEFAULT_OPEN_DETAIL_ACTIVITY);
+//		if (!currentOpenDetailActivity) {
+//			if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+//				super.onBackPressed();
+//			} else {
+//				EventBus.getDefault()
+//				        .post(new CloseDetailFragmentEvent());
+//			}
+//		} else {
+//			super.onBackPressed();
+//		}
+//	}
 }
