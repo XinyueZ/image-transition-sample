@@ -4,4 +4,5 @@
     <string name="share">Share</string>
     <string name="action_detail_activity">Detail with activity</string>
     <string name="action_detail_fragment">Detail with fragment</string>
+    <string name="default_transition_name_detail">default_transition_name_detail</string>
 </resources>
