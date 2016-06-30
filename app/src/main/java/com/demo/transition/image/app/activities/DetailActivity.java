@@ -15,6 +15,7 @@ import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import com.demo.transition.image.R;
@@ -44,7 +45,7 @@ public final class DetailActivity extends BaseActivity {
 	}
 
 
-	public static void showInstance(Activity cxt, Image image, Thumbnail thumbnail , ActivityOptionsCompat options) {
+	public static void showInstance(Activity cxt, Image image, Thumbnail thumbnail, ActivityOptionsCompat options) {
 		Intent intent = new Intent(cxt, DetailActivity.class);
 		intent.putExtra(EXTRAS_IMAGE, image);
 		intent.putExtra(EXTRAS_THUMBNAIL, thumbnail);
@@ -74,8 +75,8 @@ public final class DetailActivity extends BaseActivity {
 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			transitCompat();
-		}else {
-			mBinding.tempIv.setVisibility(View.GONE);
+		} else {
+			mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
 		}
 		Snackbar.make(mBinding.detailRootCl, R.string.action_detail_activity, Snackbar.LENGTH_SHORT)
 		        .show();
@@ -97,10 +98,16 @@ public final class DetailActivity extends BaseActivity {
 					mBinding.imageIv.getViewTreeObserver()
 					                .removeOnPreDrawListener(this);
 					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
-					                                                     .setTarget(mBinding.imageIv)
-					                                                     .setTransistor(mBinding.tempIv)
-					                                                     .build(DetailActivity.this);
-					mTransition.enter(new ViewPropertyAnimatorListenerAdapter());
+					                                         .setTarget(mBinding.imageIv)
+					                                         .build();
+					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
+						@Override
+						public void onAnimationStart(View view) {
+							super.onAnimationStart(view);
+							mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
+							mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
+						}
+					});
 					return true;
 				}
 			});
@@ -115,8 +122,8 @@ public final class DetailActivity extends BaseActivity {
 				@Override
 				public void onAnimationStart(View view) {
 					super.onAnimationStart(view);
+					mBinding.detailAppBar.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
 					mBinding.imageInformationNsv.setVisibility(View.GONE);
-					mBinding.detailAppBar.setBackgroundResource(android.R.color.transparent);
 				}
 
 				@Override

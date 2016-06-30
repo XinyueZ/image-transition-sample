@@ -1,18 +1,20 @@
 package com.demo.transition.image.transition;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
-import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.view.View;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public final class TransitCompat {
@@ -25,11 +27,10 @@ public final class TransitCompat {
 	private static final int ANIM_DURATION = 600;
 
 
-	private final ColorDrawable mColorDrawable;
+	private List<WeakReference<?>> mObjectsToFade;
 
 	private Thumbnail mThumbnail;
 	private WeakReference<? extends View> mTarget;
-	private WeakReference<? extends View> mTransistor;
 
 	private int mLeftDelta;
 	private int mTopDelta;
@@ -56,13 +57,16 @@ public final class TransitCompat {
 		}
 
 
-		public Builder setTransistor(ImageView transistor) {
-			mTransit.mTransistor = new WeakReference<>(transistor);
+		public Builder setObjectsToFade(Object... objects) {
+			mTransit.mObjectsToFade = new ArrayList<>(objects.length);
+			for (Object obj : objects) {
+				mTransit.mObjectsToFade.add(new WeakReference<>(obj));
+			}
 			return this;
 		}
 
 
-		public TransitCompat build(Context cxt) {
+		public TransitCompat build() {
 			if (mTransit.mTarget.get() == null) {
 				return null;
 			}
@@ -84,7 +88,6 @@ public final class TransitCompat {
 	}
 
 	private TransitCompat() {
-		mColorDrawable = new ColorDrawable(Color.BLACK);
 	}
 
 	/**
@@ -96,76 +99,61 @@ public final class TransitCompat {
 		if (mTarget.get() == null) {
 			return;
 		}
-		View targetIv = mTarget.get();
-
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (mTransistor.get() == null) {
-				return;
+		final View targetIv = mTarget.get();
+		final Interpolator interpolator = new BakedBezierInterpolator();
+		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && mObjectsToFade != null) {
+				List<ObjectAnimator> animators = new ArrayList<>(mObjectsToFade.size());
+				AnimatorSet animatorSet = new AnimatorSet();
+				for (WeakReference<?> obj : mObjectsToFade) {
+					if (obj.get() != null) {
+						animators.add(ObjectAnimator.ofInt(obj.get(), ALPHA, 0, 225)
+						                            .setDuration(ANIM_DURATION / 2));
+					}
+				}
+				ObjectAnimator[] array = new ObjectAnimator[animators.size()];
+				animators.toArray(array);
+				animatorSet.setInterpolator(interpolator);
+				animatorSet.playTogether(array);
+				animatorSet.addListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						super.onAnimationEnd(animation);
+						if (mTarget.get() == null) {
+							return;
+						}
+						View targetIv = mTarget.get();
+						animateEnterTarget(listener, targetIv, new BakedBezierInterpolator());
+					}
+				});
+				animatorSet.start();
+			} else {
+				animateEnterTarget(listener, targetIv, interpolator);
 			}
-			View transistorIv = mTransistor.get();
-
-			ViewCompat.setY(transistorIv, mThumbnail.getTop());
-			transistorIv.getLayoutParams().width = mThumbnail.getWidth();
-			transistorIv.getLayoutParams().height = mThumbnail.getHeight();
-
-			int transistorStartX = targetIv.getWidth()  - mThumbnail.getWidth();
-			int transistorStartY = targetIv.getBottom() - mThumbnail.getHeight();
-			ViewCompat.setPivotX(targetIv, targetIv.getRight());
-			ViewCompat.setPivotY(targetIv, targetIv.getBottom());
-			ViewCompat.setScaleX(targetIv, mWidthScale);
-			ViewCompat.setScaleY(targetIv, mHeightScale);
-			ViewCompat.setTranslationX(targetIv, mLeftDelta);
-			ViewCompat.setTranslationY(targetIv, mTopDelta);
-
-			ViewCompat.animate(transistorIv)
-			          .setDuration(ANIM_DURATION * 2)
-			          .translationX(transistorStartX)
-			          .translationY(transistorStartY)
-			          .setInterpolator(new BakedBezierInterpolator())
-			          .setListener(new ViewPropertyAnimatorListenerAdapter() {
-				          @Override
-				          public void onAnimationEnd(View view) {
-					          if (mTransistor.get() == null) {
-						          return;
-					          }
-					          View transistorIv = mTransistor.get();
-					          super.onAnimationEnd(view);
-					          ViewCompat.animate(transistorIv)
-					                    .alpha(0)
-					                    .setDuration(ANIM_DURATION)
-					                    .setListener(new ViewPropertyAnimatorListenerAdapter() {
-						                    @Override
-						                    public void onAnimationStart(View view) {
-							                    super.onAnimationEnd(view);
-							                    if (mTarget.get() == null) {
-								                    return;
-							                    }
-							                    View targetIv = mTarget.get();
-							                    ViewCompat.animate(targetIv)
-							                              .setDuration(ANIM_DURATION)
-							                              .scaleX(1)
-							                              .scaleY(1)
-							                              .translationX(0)
-							                              .translationY(0)
-							                              .setInterpolator(new BakedBezierInterpolator())
-							                              .setListener(listener)
-							                              .start();
-							                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-								                    ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0, 255)
-								                                  .setDuration(ANIM_DURATION)
-								                                  .start();
-							                    }
-						                    }
-					                    })
-					                    .start();
-				          }
-			          })
-			          .start();
 		} else {
 			listener.onAnimationStart(targetIv);
 			listener.onAnimationEnd(targetIv);
 			listener.onAnimationCancel(targetIv);
 		}
+	}
+
+	private void animateEnterTarget(ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
+		ViewCompat.setPivotX(targetIv, 0);
+		ViewCompat.setPivotY(targetIv, 0);
+		ViewCompat.setScaleX(targetIv, mWidthScale);
+		ViewCompat.setScaleY(targetIv, mHeightScale);
+		ViewCompat.setTranslationX(targetIv, mLeftDelta);
+		ViewCompat.setTranslationY(targetIv, mTopDelta);
+
+		ViewCompat.animate(targetIv)
+		          .setDuration(ANIM_DURATION)
+		          .scaleX(1)
+		          .scaleY(1)
+		          .translationX(0)
+		          .translationY(0)
+		          .setInterpolator(interpolator)
+		          .setListener(listener)
+		          .start();
 	}
 
 
@@ -177,56 +165,53 @@ public final class TransitCompat {
 		if (mTarget.get() == null) {
 			return;
 		}
-		View targetIv = mTarget.get();
-
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB && android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (mTransistor.get() == null) {
-				return;
+		final View targetIv = mTarget.get();
+		final Interpolator interpolator = new BakedBezierInterpolator();
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && mObjectsToFade != null) {
+				List<ObjectAnimator> animators = new ArrayList<>(mObjectsToFade.size());
+				AnimatorSet animatorSet = new AnimatorSet();
+				for (WeakReference<?> obj : mObjectsToFade) {
+					if (obj.get() != null) {
+						animators.add(ObjectAnimator.ofInt(obj.get(), ALPHA, 0)
+						                            .setDuration(ANIM_DURATION / 2));
+					}
+				}
+				ObjectAnimator[] array = new ObjectAnimator[animators.size()];
+				animators.toArray(array);
+				animatorSet.setInterpolator(interpolator);
+				animatorSet.playTogether(array);
+				animatorSet.addListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						super.onAnimationEnd(animation);
+						if (mTarget.get() == null) {
+							return;
+						}
+						View targetIv = mTarget.get();
+						animateExitTarget(listener, targetIv, new BakedBezierInterpolator());
+					}
+				});
+				animatorSet.start();
+			} else {
+				animateExitTarget(listener, targetIv, interpolator);
 			}
-			View transistorIv = mTransistor.get();
-
-			ViewCompat.animate(transistorIv)
-			          .setDuration(ANIM_DURATION / 2)
-			          .alpha(1)
-			          .setInterpolator(new BakedBezierInterpolator())
-			          .setListener(new ViewPropertyAnimatorListenerAdapter() {
-				          @Override
-				          public void onAnimationEnd(View view) {
-					          if (mTransistor.get() == null) {
-						          return;
-					          }
-					          super.onAnimationEnd(view);
-					          View transistorIv = mTransistor.get();
-					          ViewCompat.animate(transistorIv)
-					                    .translationX(mThumbnail.getLeft())
-					                    .translationY(mThumbnail.getTop())
-					                    .setInterpolator(new BakedBezierInterpolator())
-					                    .setDuration(ANIM_DURATION)
-					                    .start();
-				          }
-			          })
-			          .start();
-
-			ViewCompat.setPivotX(targetIv, targetIv.getRight());
-			ViewCompat.setPivotY(targetIv, targetIv.getBottom());
-			ViewCompat.animate(targetIv)
-			          .setDuration(ANIM_DURATION * 2)
-			          .scaleX(mWidthScale)
-			          .scaleY(mHeightScale)
-			          .translationX(mLeftDelta)
-			          .translationY(mTopDelta)
-			          .setInterpolator(new BakedBezierInterpolator())
-			          .setListener(listener)
-			          .start();
-
-
-			ObjectAnimator.ofInt(mColorDrawable, ALPHA, 0)
-			              .setDuration(ANIM_DURATION)
-			              .start();
 		} else {
 			listener.onAnimationStart(targetIv);
 			listener.onAnimationEnd(targetIv);
 			listener.onAnimationCancel(targetIv);
 		}
+	}
+
+	private void animateExitTarget(ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
+		ViewCompat.animate(targetIv)
+		          .setDuration(ANIM_DURATION * 2)
+		          .scaleX(mWidthScale)
+		          .scaleY(mHeightScale)
+		          .translationX(mLeftDelta)
+		          .translationY(mTopDelta)
+		          .setInterpolator(interpolator)
+		          .setListener(listener)
+		          .start();
 	}
 }

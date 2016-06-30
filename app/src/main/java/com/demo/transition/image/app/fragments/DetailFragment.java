@@ -1,7 +1,6 @@
 package com.demo.transition.image.app.fragments;
 
 
-import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Build;
@@ -53,25 +52,9 @@ public final class DetailFragment extends BaseFragment {
 	 */
 	@Subscribe
 	public void onEvent(@SuppressWarnings("UnusedParameters") CloseDetailFragmentEvent e) {
-		if (mTransition != null) {
-			mTransition.exit(new ViewPropertyAnimatorListenerAdapter() {
-				@Override
-				public void onAnimationStart(View view) {
-					super.onAnimationStart(view);
-					mBinding.imageInformationNsv.setVisibility(View.GONE);
-					mBinding.detailAppBar.setBackgroundResource(android.R.color.transparent);
-				}
-
-				@Override
-				public void onAnimationEnd(View v) {
-					super.onAnimationEnd(v);
-					EventBus.getDefault().post(new PopUpDetailFragmentEvent());
-				}
-			});
-		} else {
-			EventBus.getDefault().post(new PopUpDetailFragmentEvent());
-		}
+		closeThisFragment();
 	}
+
 
 	//------------------------------------------------
 
@@ -112,7 +95,8 @@ public final class DetailFragment extends BaseFragment {
 		mBinding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				EventBus.getDefault().post(new PopUpDetailFragmentEvent());
+				EventBus.getDefault()
+				        .post(new PopUpDetailFragmentEvent());
 			}
 		});
 		mBinding.toolbar.inflateMenu(MENU_DETAIL);
@@ -131,15 +115,14 @@ public final class DetailFragment extends BaseFragment {
 		mBinding.setImage(image);
 
 
-		if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.LOLLIPOP) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			ViewCompat.setTransitionName(mBinding.imageIv, getArguments().getString(EXTRAS_TRANSITION_NAME));
 		}
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			transitCompat();
 		} else {
-			mBinding.tempIv.setVisibility(View.GONE);
+			mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
 		}
-
 		Snackbar.make(mBinding.detailRootCl, R.string.action_detail_fragment, Snackbar.LENGTH_SHORT)
 		        .show();
 	}
@@ -154,21 +137,47 @@ public final class DetailFragment extends BaseFragment {
 			observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
 				@Override
 				public boolean onPreDraw() {
-					Activity activity = getActivity();
-					if (activity != null) {
-						Object object = getArguments().getSerializable(EXTRAS_THUMBNAIL);
-						mBinding.imageIv.getViewTreeObserver()
-						                .removeOnPreDrawListener(this);
-						mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
-						                                                     .setTarget(mBinding.imageIv)
-						                                                     .setTransistor(mBinding.tempIv)
-						                                                     .build(activity);
-						mTransition.enter(new ViewPropertyAnimatorListenerAdapter());
-					}
-
+					Object object = getArguments().getSerializable(EXTRAS_THUMBNAIL);
+					mBinding.imageIv.getViewTreeObserver()
+					                .removeOnPreDrawListener(this);
+					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
+					                                         .setTarget(mBinding.imageIv)
+					                                         .build();
+					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
+						@Override
+						public void onAnimationStart(View view) {
+							super.onAnimationStart(view);
+							mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
+							mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
+						}
+					});
 					return true;
 				}
 			});
+		}
+	}
+
+
+	private void closeThisFragment() {
+		if (mTransition != null) {
+			mTransition.exit(new ViewPropertyAnimatorListenerAdapter() {
+				@Override
+				public void onAnimationStart(View view) {
+					super.onAnimationStart(view);
+					mBinding.detailAppBar.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+					mBinding.imageInformationNsv.setVisibility(View.GONE);
+				}
+
+				@Override
+				public void onAnimationEnd(View v) {
+					super.onAnimationEnd(v);
+					EventBus.getDefault()
+					        .post(new PopUpDetailFragmentEvent());
+				}
+			});
+		} else {
+			EventBus.getDefault()
+			        .post(new PopUpDetailFragmentEvent());
 		}
 	}
 }

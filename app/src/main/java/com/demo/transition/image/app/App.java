@@ -42,7 +42,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public final class App extends MultiDexApplication {
 	public static final String KEY_OPEN_DETAIL_ACTIVITY = "open-detail-activity";
 	public static final String PREFS = "App";
-	public static final boolean DEFAULT_OPEN_DETAIL_ACTIVITY = false;
+	public static final boolean DEFAULT_OPEN_DETAIL_ACTIVITY = true;
 	@SuppressWarnings("CanBeFinal") public static App Instance;
 
 
