@@ -21,13 +21,6 @@ Under Lollipop we do followings:
 
 - The "detail" can be shown by activity or fragment, you can select from menu on home-screen.
 
-## screen
-![Above Lollipop ](/media/Above_Lollipop)
-					[1-1] Above Lollipop 
-
-
-![Below Lollipop ](/media/EventBus-Publish-Subscribe.png)
-					[1-1] Below Lollipop
 
 ## Code
 
