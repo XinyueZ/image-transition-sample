@@ -3,7 +3,7 @@ image-transition-sample
 
 ## Learning how to make transitions on images, objects to show "list"-"detail".
 
-One of the cornerstones of Material design is meaningful motion between screens. Lollipop introduced support for these animations in the form of the transitions framework, which allows us to animate transitions between Activities and Fragments.
+One of the cornerstones of Material Design is meaningful motion between screens. Lollipop introduced support for these animations in the form of the transitions framework, which allows us to animate transitions between Activities and Fragments.
 
 However under Lollipop we should do some tricks to make it "compat".
 
