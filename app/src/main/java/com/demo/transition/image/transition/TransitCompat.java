@@ -145,9 +145,11 @@ public final class TransitCompat {
 				animateEnterTarget(listener, targetIv, interpolator);
 			}
 		} else {
-			listener.onAnimationStart(targetIv);
-			listener.onAnimationEnd(targetIv);
-			listener.onAnimationCancel(targetIv);
+			if(listener != null) {
+				listener.onAnimationStart(targetIv);
+				listener.onAnimationEnd(targetIv);
+				listener.onAnimationCancel(targetIv);
+			}
 		}
 	}
 
@@ -232,9 +234,11 @@ public final class TransitCompat {
 				animateExitTarget(listener, targetIv, interpolator);
 			}
 		} else {
-			listener.onAnimationStart(targetIv);
-			listener.onAnimationEnd(targetIv);
-			listener.onAnimationCancel(targetIv);
+			if(listener != null) {
+				listener.onAnimationStart(targetIv);
+				listener.onAnimationEnd(targetIv);
+				listener.onAnimationCancel(targetIv);
+			}
 		}
 	}
 
