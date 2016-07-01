@@ -126,8 +126,6 @@ public final class DetailFragment extends BaseFragment {
 		}
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			transitCompat();
-		} else {
-			mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
 		}
 		Snackbar.make(mBinding.detailRootCl, R.string.action_detail_fragment, Snackbar.LENGTH_SHORT)
 		        .show();
@@ -135,6 +133,7 @@ public final class DetailFragment extends BaseFragment {
 
 
 	private void transitCompat() {
+		mBinding.detailAppBar.getLayoutParams().height = Utils.getScreenSize(App.Instance).Height;
 		Object thumbnail = getArguments().getSerializable(EXTRAS_THUMBNAIL);
 		if (thumbnail != null) {
 			// Only run the animation if we're coming from the parent activity, not if

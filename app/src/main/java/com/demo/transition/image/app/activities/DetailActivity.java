@@ -81,8 +81,6 @@ public final class DetailActivity extends BaseActivity {
 
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			transitCompat();
-		} else {
-			mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
 		}
 		Snackbar.make(mBinding.detailRootCl, R.string.action_detail_activity, Snackbar.LENGTH_SHORT)
 		        .show();
@@ -90,6 +88,7 @@ public final class DetailActivity extends BaseActivity {
 
 
 	private void transitCompat() {
+		mBinding.detailAppBar.getLayoutParams().height = Utils.getScreenSize(App.Instance).Height;
 		Intent intent = getIntent();
 		Object thumbnail = intent.getSerializableExtra(EXTRAS_THUMBNAIL);
 		if (thumbnail != null) {

@@ -16,14 +16,13 @@
         android:id="@+id/detail_root_cl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipChildren="false"
         android:fitsSystemWindows="true"
         >
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/detail_app_bar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="@dimen/detail_backdrop_height"
             android:background="@android:color/transparent"
             android:fitsSystemWindows="true"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
