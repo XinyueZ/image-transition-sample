@@ -13,15 +13,21 @@ My end product is fairly simple. We will be making an app that has a list of ima
 
 Under Lollipop we do followings:
 
-- "thumbnail" means meta-data from image-view on "list", inc. "left", "top", "width" and "height".
+- "thumbnail" for meta-data from image-view on "list", inc. "left", "top", "width" and "height".
 
-- "transistor" as counterpart, a way to associate Views on the first screen to it  on the second screen "detail",  stays on detail view  before the "target" of detail view  will be opened, it helps us to make a smooth transition from "thumbnail" to "target".
+- Above Lollipop the sample uses [Android transition framework](https://developer.android.com/training/transitions/index.html), because of limited build-in transitions but remember that the framework has been supported since Android 4.4.2 (API level 19) or higher.
 
-- For case ```VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB && VERSION.SDK_INT <= VERSION_CODES.KITKAT``` the app use "compat" idea to do transition.
-
-- Under HoneyComb or beyond Lollipop, use support-lib to do.
+- Below Lollipop the sample uses ```TransitCompat```
 
 - The "detail" can be shown by activity or fragment, you can select from menu on home-screen.
+
+## screen
+![Above Lollipop ](/media/Above_Lollipop)
+					[1-1] Above Lollipop 
+
+
+![Below Lollipop ](/media/EventBus-Publish-Subscribe.png)
+					[1-1] Below Lollipop
 
 ## Code
 

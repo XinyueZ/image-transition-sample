@@ -25,13 +25,16 @@ import com.demo.transition.image.app.api.Api;
 import com.demo.transition.image.bus.LoadImagesErrorEvent;
 import com.demo.transition.image.bus.LoadImagesSuccessEvent;
 import com.demo.transition.image.databinding.FragmentMainBinding;
+import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.ds.ImagesRequest;
 import com.demo.transition.image.ds.ImagesResponse;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -45,7 +48,7 @@ public final class MainFragment extends BaseFragment {
 	private static final int LAYOUT = R.layout.fragment_main;
 	private static final int MENU_MAIN = R.menu.menu_main;
 	private FragmentMainBinding mBinding;
-	private ImagesResponse mImagesResponse;
+	private List<Image> mLastImagesList;
 
 	//------------------------------------------------
 	//Subscribes, event-handlers
@@ -58,7 +61,10 @@ public final class MainFragment extends BaseFragment {
 	 */
 	@Subscribe
 	public void onEvent(LoadImagesSuccessEvent e) {
-		setData(e.getImagesResponse());
+		if (e.getImagesResponse() != null) {
+			setData(e.getImagesResponse()
+			         .getResult());
+		}
 	}
 
 
@@ -99,7 +105,7 @@ public final class MainFragment extends BaseFragment {
 		mBinding.activityMainSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 			@Override
 			public void onRefresh() {
-				mImagesResponse = null;
+				clearData();
 				loadOrSetData();
 			}
 		});
@@ -149,11 +155,19 @@ public final class MainFragment extends BaseFragment {
 		loadOrSetData();
 	}
 
+	@Override
+	public void onDestroyView() {
+		if (mBinding.imagesListRv.getAdapter() != null) {
+			ImagesResponseAdapter adp = (ImagesResponseAdapter) mBinding.imagesListRv.getAdapter();
+			mLastImagesList = adp.getImagesList();
+		}
+		super.onDestroyView();
+	}
 
 	private void loadOrSetData() {
-		if (mImagesResponse != null) {
+		if (mLastImagesList != null) {
 			//Set data if already loaded.
-			setData(mImagesResponse);
+			setData(mLastImagesList);
 			return;
 		}
 
@@ -172,8 +186,29 @@ public final class MainFragment extends BaseFragment {
 		}
 	}
 
-	private void setData(ImagesResponse response ) {
-		mBinding.imagesListRv.setAdapter(new ImagesResponseAdapter(response));
+	private synchronized void setData(List<Image> imagesList) {
+		if (imagesList == null) {
+			return;
+		}
+		if (mBinding.imagesListRv.getAdapter() == null) {
+			mBinding.imagesListRv.setAdapter(new ImagesResponseAdapter(new ArrayList<Image>()));
+		}
+		ImagesResponseAdapter adp = (ImagesResponseAdapter) mBinding.imagesListRv.getAdapter();
+		adp.getImagesList()
+		   .addAll(imagesList);
+		adp.notifyDataSetChanged();
+	}
+
+	private synchronized  void clearData() {
+		mLastImagesList = null;
+		if (mBinding.imagesListRv.getAdapter() != null) {
+			ImagesResponseAdapter adp = (ImagesResponseAdapter) mBinding.imagesListRv.getAdapter();
+			adp.getImagesList()
+			   .clear();
+			adp.notifyDataSetChanged();
+		} else {
+			mBinding.imagesListRv.setAdapter(new ImagesResponseAdapter(new ArrayList<Image>()));
+		}
 	}
 
 	private void loadPhotoList(int year, int month, String timeZone) {
@@ -192,7 +227,6 @@ public final class MainFragment extends BaseFragment {
 				if (response.isSuccessful()) {
 					EventBus.getDefault()
 					        .post(new LoadImagesSuccessEvent(response.body()));
-					mImagesResponse = response.body();
 				} else {
 					EventBus.getDefault()
 					        .post(new LoadImagesErrorEvent());
@@ -208,9 +242,6 @@ public final class MainFragment extends BaseFragment {
 			}
 		});
 	}
-
-
-
 
 
 	public static class DividerDecoration extends RecyclerView.ItemDecoration {

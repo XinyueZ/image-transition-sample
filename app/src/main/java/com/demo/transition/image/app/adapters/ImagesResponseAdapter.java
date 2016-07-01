@@ -13,33 +13,35 @@ import com.demo.transition.image.R;
 import com.demo.transition.image.bus.ClickImageEvent;
 import com.demo.transition.image.databinding.ListImagesItemBinding;
 import com.demo.transition.image.ds.Image;
-import com.demo.transition.image.ds.ImagesResponse;
 import com.demo.transition.image.transition.Thumbnail;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.List;
 
 public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResponseAdapter.ImagesListItemViewHolder> {
 	/**
 	 * Main layout for this component.
 	 */
 	private static final int ITEM_LAYOUT = R.layout.item_list_images;
-	private  ImagesResponse mImagesResponse;
+	private List<Image> mImagesList;
 
 
-
-	public ImagesResponseAdapter(ImagesResponse imagesResponse) {
-		mImagesResponse = imagesResponse;
+	public ImagesResponseAdapter(List<Image> imagesList) {
+		mImagesList = imagesList;
 	}
 
 
 	@Override
 	public int getItemCount() {
-		return mImagesResponse == null ?
+		return mImagesList == null ?
 		       0 :
-		       mImagesResponse.getResult()
-		                      .size();
+		       mImagesList.size();
 	}
 
+	public List<Image> getImagesList() {
+		return mImagesList;
+	}
 
 	@Override
 	public ImagesListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -52,11 +54,9 @@ public final class ImagesResponseAdapter extends RecyclerView.Adapter<ImagesResp
 	@Override
 	public void onBindViewHolder(ImagesListItemViewHolder holder, int position) {
 		holder.mBinding.setHandler(new ImagesListItemHandler(holder));
-		holder.mBinding.setImage(mImagesResponse.getResult()
-		                                        .get(holder.getAdapterPosition()));
+		holder.mBinding.setImage(mImagesList.get(holder.getAdapterPosition()));
 		holder.mBinding.executePendingBindings();
 	}
-
 
 
 	static class ImagesListItemViewHolder extends RecyclerView.ViewHolder {

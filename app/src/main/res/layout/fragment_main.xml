@@ -30,13 +30,13 @@
             style="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="@dimen/ab_elevation"
             >
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 style="@style/ThemeOverlay.AppCompat.Light"
                 android:layout_width="match_parent"
+                android:elevation="@dimen/ab_elevation"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_scrollFlags="scroll|enterAlways|snap"/>
 

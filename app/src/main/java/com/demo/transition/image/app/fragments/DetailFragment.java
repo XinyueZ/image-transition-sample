@@ -149,7 +149,7 @@ public final class DetailFragment extends BaseFragment {
 					                .removeOnPreDrawListener(this);
 
 					ValueAnimatorCompat a1 = AnimatorCompatHelper.emptyValueAnimator();
-					a1.setDuration(TransitCompat.ANIM_DURATION * 2);
+					a1.setDuration(TransitCompat.ANIM_DURATION );
 					final Interpolator interpolator1 = new BakedBezierInterpolator();
 					a1.addUpdateListener(new AnimatorUpdateListenerCompat() {
 						private float oldHeight = Utils.getScreenSize(App.Instance).Height;
