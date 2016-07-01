@@ -20,7 +20,7 @@ public final class ImageViewBindingHelper {
 		VectorDrawableCompat errorDrawableCompat = VectorDrawableCompat.create(App.Instance.getResources(), R.drawable.ic_panorama, null);
 		Glide.with(App.Instance)
 		     .load(imageUrl)
-		     .dontAnimate()
+		     .crossFade()
 		     .error(errorDrawableCompat)
 		     .diskCacheStrategy(DiskCacheStrategy.ALL)
 		     .centerCrop()
@@ -41,6 +41,7 @@ public final class ImageViewBindingHelper {
 		Glide.with(App.Instance)
 		     .load(thumbnailUrl)
 		     .placeholder(dr)
+		     .crossFade()
 		     .dontAnimate()
 		     .error(errorDrawableCompat)
 		     .diskCacheStrategy(DiskCacheStrategy.ALL)

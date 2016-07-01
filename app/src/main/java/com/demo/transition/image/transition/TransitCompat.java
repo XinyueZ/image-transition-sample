@@ -1,10 +1,6 @@
 package com.demo.transition.image.transition;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.os.Build;
 import android.support.v4.animation.ValueAnimatorCompat;
 import android.support.v4.view.ViewCompat;
@@ -15,22 +11,14 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
 public final class TransitCompat {
-	/**
-	 * There is different between android pre 3.0 and 3.x, 4.x on this wording.
-	 */
-	private static final String ALPHA = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
-	                                    "alpha" :
-	                                    "Alpha";
 	public static final int ANIM_DURATION = 600;
 
 
-	private List<WeakReference<?>> mObjectsToFade;
 	private List<ValueAnimatorCompat> mPlayTogetherAfterEnterValueAnimators;
 	private List<ValueAnimatorCompat> mPlayTogetherBeforeExitValueAnimators;
 
@@ -62,20 +50,12 @@ public final class TransitCompat {
 		}
 
 
-		public Builder setObjectsToFade(Object... objects) {
-			mTransit.mObjectsToFade = new ArrayList<>(objects.length);
-			for (Object obj : objects) {
-				mTransit.mObjectsToFade.add(new WeakReference<>(obj));
-			}
-			return this;
-		}
-
-		public Builder setPlayTogetherAfterEnterValueAnimators(ValueAnimatorCompat... playerAnimators) {
+		public Builder setPlayTogetherAfterEnterTransition(ValueAnimatorCompat... playerAnimators) {
 			mTransit.mPlayTogetherAfterEnterValueAnimators = Arrays.asList(playerAnimators);
 			return this;
 		}
 
-		public Builder setPlayTogetherBeforeExitValueAnimators(ValueAnimatorCompat... playerAnimators) {
+		public Builder setPlayTogetherBeforeExitTransition(ValueAnimatorCompat... playerAnimators) {
 			mTransit.mPlayTogetherBeforeExitValueAnimators = Arrays.asList(playerAnimators);
 			return this;
 		}
@@ -116,36 +96,9 @@ public final class TransitCompat {
 		final View targetIv = mTarget.get();
 		final Interpolator interpolator = new BakedBezierInterpolator();
 		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && mObjectsToFade != null) {
-				List<ObjectAnimator> animators = new ArrayList<>(mObjectsToFade.size());
-				AnimatorSet animatorSet = new AnimatorSet();
-				for (WeakReference<?> obj : mObjectsToFade) {
-					if (obj.get() != null) {
-						animators.add(ObjectAnimator.ofInt(obj.get(), ALPHA, 0, 225)
-						                            .setDuration(ANIM_DURATION / 2));
-					}
-				}
-				ObjectAnimator[] array = new ObjectAnimator[animators.size()];
-				animators.toArray(array);
-				animatorSet.setInterpolator(interpolator);
-				animatorSet.playTogether(array);
-				animatorSet.addListener(new AnimatorListenerAdapter() {
-					@Override
-					public void onAnimationEnd(Animator animation) {
-						super.onAnimationEnd(animation);
-						if (mTarget.get() == null) {
-							return;
-						}
-						View targetIv = mTarget.get();
-						animateEnterTarget(listener, targetIv, new BakedBezierInterpolator());
-					}
-				});
-				animatorSet.start();
-			} else {
-				animateEnterTarget(listener, targetIv, interpolator);
-			}
+			animateEnterTarget(listener, targetIv, interpolator);
 		} else {
-			if(listener != null) {
+			if (listener != null) {
 				listener.onAnimationStart(targetIv);
 				listener.onAnimationEnd(targetIv);
 				listener.onAnimationCancel(targetIv);
@@ -205,36 +158,9 @@ public final class TransitCompat {
 		final View targetIv = mTarget.get();
 		final Interpolator interpolator = new BakedBezierInterpolator();
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && mObjectsToFade != null) {
-				List<ObjectAnimator> animators = new ArrayList<>(mObjectsToFade.size());
-				AnimatorSet animatorSet = new AnimatorSet();
-				for (WeakReference<?> obj : mObjectsToFade) {
-					if (obj.get() != null) {
-						animators.add(ObjectAnimator.ofInt(obj.get(), ALPHA, 0)
-						                            .setDuration(ANIM_DURATION / 2));
-					}
-				}
-				ObjectAnimator[] array = new ObjectAnimator[animators.size()];
-				animators.toArray(array);
-				animatorSet.setInterpolator(interpolator);
-				animatorSet.playTogether(array);
-				animatorSet.addListener(new AnimatorListenerAdapter() {
-					@Override
-					public void onAnimationEnd(Animator animation) {
-						super.onAnimationEnd(animation);
-						if (mTarget.get() == null) {
-							return;
-						}
-						View targetIv = mTarget.get();
-						animateExitTarget(listener, targetIv, new BakedBezierInterpolator());
-					}
-				});
-				animatorSet.start();
-			} else {
-				animateExitTarget(listener, targetIv, interpolator);
-			}
+			animateExitTarget(listener, targetIv, interpolator);
 		} else {
-			if(listener != null) {
+			if (listener != null) {
 				listener.onAnimationStart(targetIv);
 				listener.onAnimationEnd(targetIv);
 				listener.onAnimationCancel(targetIv);

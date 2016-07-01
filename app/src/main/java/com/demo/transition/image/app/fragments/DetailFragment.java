@@ -134,6 +134,7 @@ public final class DetailFragment extends BaseFragment {
 
 	private void transitCompat() {
 		mBinding.detailAppBar.getLayoutParams().height = Utils.getScreenSize(App.Instance).Height;
+		mBinding.imageInformationNsv.getBackground().setAlpha(0);
 		Object thumbnail = getArguments().getSerializable(EXTRAS_THUMBNAIL);
 		if (thumbnail != null) {
 			// Only run the animation if we're coming from the parent activity, not if
@@ -147,17 +148,27 @@ public final class DetailFragment extends BaseFragment {
 					                .removeOnPreDrawListener(this);
 
 					ValueAnimatorCompat a1 = AnimatorCompatHelper.emptyValueAnimator();
-					a1.setDuration(TransitCompat.ANIM_DURATION);
+					a1.setDuration(TransitCompat.ANIM_DURATION * 2);
 					final Interpolator interpolator1 = new BakedBezierInterpolator();
 					a1.addUpdateListener(new AnimatorUpdateListenerCompat() {
 						private float oldHeight = Utils.getScreenSize(App.Instance).Height;
 						private float endHeight = getResources().getDimension(R.dimen.detail_backdrop_height);
+
+						private float oldBgAlpha = 0;
+						private float endBgAlpha = 255;
+
 						@Override
 						public void onAnimationUpdate(ValueAnimatorCompat animation) {
 							float fraction = interpolator1.getInterpolation(animation.getAnimatedFraction());
+
+							//Set height
 							float currentHeight = oldHeight + (fraction * (endHeight - oldHeight));
 							mBinding.detailAppBar.getLayoutParams().height = (int) currentHeight;
 							mBinding.detailAppBar.requestLayout();
+
+							//Set background alpha
+							mBinding.imageInformationNsv.getBackground().setAlpha((int) (oldBgAlpha + (fraction * (endBgAlpha - oldBgAlpha))));
+							mBinding.imageInformationNsv.invalidate();
 						}
 					});
 
@@ -178,8 +189,8 @@ public final class DetailFragment extends BaseFragment {
 
 					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
 					                                         .setTarget(mBinding.imageIv)
-					                                         .setPlayTogetherAfterEnterValueAnimators(a1)
-					                                         .setPlayTogetherBeforeExitValueAnimators(a2)
+					                                         .setPlayTogetherAfterEnterTransition(a1)
+					                                         .setPlayTogetherBeforeExitTransition(a2)
 					                                         .build();
 
 					mTransition.enter(new ViewPropertyAnimatorListenerAdapter());
