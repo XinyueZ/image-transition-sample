@@ -7,6 +7,9 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.animation.AnimatorCompatHelper;
+import android.support.v4.animation.AnimatorUpdateListenerCompat;
+import android.support.v4.animation.ValueAnimatorCompat;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.MenuItemCompat;
@@ -15,14 +18,17 @@ import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.Interpolator;
 
 import com.demo.transition.image.R;
+import com.demo.transition.image.app.App;
 import com.demo.transition.image.databinding.LayoutDetailBinding;
 import com.demo.transition.image.ds.Image;
+import com.demo.transition.image.transition.BakedBezierInterpolator;
 import com.demo.transition.image.transition.Thumbnail;
 import com.demo.transition.image.transition.TransitCompat;
+import com.demo.transition.image.utils.Utils;
 
 import java.io.Serializable;
 
@@ -97,17 +103,44 @@ public final class DetailActivity extends BaseActivity {
 					Object object = intent.getSerializableExtra(EXTRAS_THUMBNAIL);
 					mBinding.imageIv.getViewTreeObserver()
 					                .removeOnPreDrawListener(this);
-					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
-					                                         .setTarget(mBinding.imageIv)
-					                                         .build();
-					mTransition.enter(new ViewPropertyAnimatorListenerAdapter() {
+
+					ValueAnimatorCompat a1 = AnimatorCompatHelper.emptyValueAnimator();
+					a1.setDuration(TransitCompat.ANIM_DURATION);
+					final Interpolator interpolator1 = new BakedBezierInterpolator();
+					a1.addUpdateListener(new AnimatorUpdateListenerCompat() {
+						private float oldHeight = Utils.getScreenSize(App.Instance).Height;
+						private float endHeight = getResources().getDimension(R.dimen.detail_backdrop_height);
 						@Override
-						public void onAnimationStart(View view) {
-							super.onAnimationStart(view);
-							mBinding.imageInformationNsv.setVisibility(View.VISIBLE);
-							mBinding.detailAppBar.getLayoutParams().height = getResources().getDimensionPixelOffset(R.dimen.detail_backdrop_height);
+						public void onAnimationUpdate(ValueAnimatorCompat animation) {
+							float fraction = interpolator1.getInterpolation(animation.getAnimatedFraction());
+							float currentHeight = oldHeight + (fraction * (endHeight - oldHeight));
+							mBinding.detailAppBar.getLayoutParams().height = (int) currentHeight;
+							mBinding.detailAppBar.requestLayout();
 						}
 					});
+
+					ValueAnimatorCompat a2 = AnimatorCompatHelper.emptyValueAnimator();
+					a2.setDuration(TransitCompat.ANIM_DURATION);
+					final Interpolator interpolator2 = new BakedBezierInterpolator();
+					a2.addUpdateListener(new AnimatorUpdateListenerCompat() {
+						private float oldHeight =getResources().getDimension(R.dimen.detail_backdrop_height);
+						private float endHeight =  Utils.getScreenSize(App.Instance).Height ;
+						@Override
+						public void onAnimationUpdate(ValueAnimatorCompat animation) {
+							float fraction = interpolator2.getInterpolation(animation.getAnimatedFraction());
+							float currentHeight = oldHeight + (fraction * (endHeight - oldHeight));
+							mBinding.detailAppBar.getLayoutParams().height = (int) currentHeight;
+							mBinding.detailAppBar.requestLayout();
+						}
+					});
+
+
+					mTransition = new TransitCompat.Builder().setThumbnail((Thumbnail) object)
+					                                         .setTarget(mBinding.imageIv)
+					                                         .setPlayTogetherAfterEnterValueAnimators(a1)
+					                                         .setPlayTogetherBeforeExitValueAnimators(a2)
+					                                         .build();
+					mTransition.enter(new ViewPropertyAnimatorListenerAdapter());
 					return true;
 				}
 			});
@@ -119,13 +152,6 @@ public final class DetailActivity extends BaseActivity {
 	public void onBackPressed() {
 		if (mTransition != null) {
 			mTransition.exit(new ViewPropertyAnimatorListenerAdapter() {
-				@Override
-				public void onAnimationStart(View view) {
-					super.onAnimationStart(view);
-					mBinding.detailAppBar.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-					mBinding.imageInformationNsv.setVisibility(View.GONE);
-				}
-
 				@Override
 				public void onAnimationEnd(View v) {
 					super.onAnimationEnd(v);

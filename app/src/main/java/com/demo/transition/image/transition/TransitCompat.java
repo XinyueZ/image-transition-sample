@@ -6,14 +6,17 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Build;
+import android.support.v4.animation.ValueAnimatorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
+import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -24,10 +27,12 @@ public final class TransitCompat {
 	private static final String ALPHA = (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1) ?
 	                                    "alpha" :
 	                                    "Alpha";
-	private static final int ANIM_DURATION = 600;
+	public static final int ANIM_DURATION = 600;
 
 
 	private List<WeakReference<?>> mObjectsToFade;
+	private List<ValueAnimatorCompat> mPlayTogetherAfterEnterValueAnimators;
+	private List<ValueAnimatorCompat> mPlayTogetherBeforeExitValueAnimators;
 
 	private Thumbnail mThumbnail;
 	private WeakReference<? extends View> mTarget;
@@ -65,6 +70,15 @@ public final class TransitCompat {
 			return this;
 		}
 
+		public Builder setPlayTogetherAfterEnterValueAnimators(ValueAnimatorCompat... playerAnimators) {
+			mTransit.mPlayTogetherAfterEnterValueAnimators = Arrays.asList(playerAnimators);
+			return this;
+		}
+
+		public Builder setPlayTogetherBeforeExitValueAnimators(ValueAnimatorCompat... playerAnimators) {
+			mTransit.mPlayTogetherBeforeExitValueAnimators = Arrays.asList(playerAnimators);
+			return this;
+		}
 
 		public TransitCompat build() {
 			if (mTransit.mTarget.get() == null) {
@@ -137,7 +151,7 @@ public final class TransitCompat {
 		}
 	}
 
-	private void animateEnterTarget(ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
+	private void animateEnterTarget(final ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
 		ViewCompat.setPivotX(targetIv, 0);
 		ViewCompat.setPivotY(targetIv, 0);
 		ViewCompat.setScaleX(targetIv, mWidthScale);
@@ -152,7 +166,28 @@ public final class TransitCompat {
 		          .translationX(0)
 		          .translationY(0)
 		          .setInterpolator(interpolator)
-		          .setListener(listener)
+		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+			          @Override
+			          public void onAnimationStart(View view) {
+				          super.onAnimationStart(view);
+				          listener.onAnimationStart(view);
+			          }
+
+			          @Override
+			          public void onAnimationEnd(View view) {
+				          super.onAnimationEnd(view);
+				          listener.onAnimationEnd(view);
+				          for (ValueAnimatorCompat p : mPlayTogetherAfterEnterValueAnimators) {
+					          p.start();
+				          }
+			          }
+
+			          @Override
+			          public void onAnimationCancel(View view) {
+				          super.onAnimationCancel(view);
+				          listener.onAnimationCancel(view);
+			          }
+		          })
 		          .start();
 	}
 
@@ -203,7 +238,7 @@ public final class TransitCompat {
 		}
 	}
 
-	private void animateExitTarget(ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
+	private void animateExitTarget(final ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
 		ViewCompat.animate(targetIv)
 		          .setDuration(ANIM_DURATION * 2)
 		          .scaleX(mWidthScale)
@@ -211,7 +246,28 @@ public final class TransitCompat {
 		          .translationX(mLeftDelta)
 		          .translationY(mTopDelta)
 		          .setInterpolator(interpolator)
-		          .setListener(listener)
+		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+			          @Override
+			          public void onAnimationStart(View view) {
+				          super.onAnimationStart(view);
+				          for (ValueAnimatorCompat p : mPlayTogetherBeforeExitValueAnimators) {
+					          p.start();
+				          }
+				          listener.onAnimationStart(view);
+			          }
+
+			          @Override
+			          public void onAnimationEnd(View view) {
+				          super.onAnimationEnd(view);
+				          listener.onAnimationEnd(view);
+			          }
+
+			          @Override
+			          public void onAnimationCancel(View view) {
+				          super.onAnimationCancel(view);
+				          listener.onAnimationCancel(view);
+			          }
+		          })
 		          .start();
 	}
 }
