@@ -4,6 +4,7 @@ package com.demo.transition.image.app.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -134,13 +135,23 @@ public final class DetailActivity extends BaseActivity {
 					final Interpolator interpolator2 = new BakedBezierInterpolator();
 					a2.addUpdateListener(new AnimatorUpdateListenerCompat() {
 						private float oldHeight =getResources().getDimension(R.dimen.detail_backdrop_height);
-						private float endHeight =  Utils.getScreenSize(App.Instance).Height ;
+						private float endHeight =  Utils.getScreenSize(App.Instance).Height;
+
+						private float oldBgAlpha = 255;
+						private float endBgAlpha = 0;
+
 						@Override
 						public void onAnimationUpdate(ValueAnimatorCompat animation) {
 							float fraction = interpolator2.getInterpolation(animation.getAnimatedFraction());
+
+							//Set height
 							float currentHeight = oldHeight + (fraction * (endHeight - oldHeight));
 							mBinding.detailAppBar.getLayoutParams().height = (int) currentHeight;
 							mBinding.detailAppBar.requestLayout();
+
+							//Set title alpha
+							int alpha = (int) (oldBgAlpha + (fraction * (endBgAlpha - oldBgAlpha)));
+							mBinding.collapsingToolbarLayout.setExpandedTitleColor(Color.argb(alpha, (int)oldBgAlpha, (int)oldBgAlpha, (int)oldBgAlpha));
 						}
 					});
 
