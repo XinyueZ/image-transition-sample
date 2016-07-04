@@ -11,3 +11,4 @@
 gradle/*.*
 gradle/
 gradle*
+!gradle.properties
