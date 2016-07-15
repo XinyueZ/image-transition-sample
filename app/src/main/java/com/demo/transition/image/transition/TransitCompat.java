@@ -132,8 +132,10 @@ public final class TransitCompat {
 			          public void onAnimationEnd(View view) {
 				          super.onAnimationEnd(view);
 				          listener.onAnimationEnd(view);
-				          for (ValueAnimatorCompat p : mPlayTogetherAfterEnterValueAnimators) {
-					          p.start();
+				          if (mPlayTogetherAfterEnterValueAnimators != null) {
+					          for (ValueAnimatorCompat p : mPlayTogetherAfterEnterValueAnimators) {
+						          p.start();
+					          }
 				          }
 			          }
 
@@ -180,8 +182,10 @@ public final class TransitCompat {
 			          @Override
 			          public void onAnimationStart(View view) {
 				          super.onAnimationStart(view);
-				          for (ValueAnimatorCompat p : mPlayTogetherBeforeExitValueAnimators) {
-					          p.start();
+				          if (mPlayTogetherBeforeExitValueAnimators != null) {
+					          for (ValueAnimatorCompat p : mPlayTogetherBeforeExitValueAnimators) {
+						          p.start();
+					          }
 				          }
 				          listener.onAnimationStart(view);
 			          }
