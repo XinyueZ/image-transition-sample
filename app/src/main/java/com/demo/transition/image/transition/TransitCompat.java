@@ -107,7 +107,7 @@ public final class TransitCompat {
 		ViewCompat.setTranslationY(target, mTopDelta);
 
 		ViewCompat.animate(target)
-		          .setDuration(ANIM_DURATION)
+		          .setDuration(ANIM_DURATION * 4)
 		          .scaleX(1)
 		          .scaleY(1)
 		          .translationX(0)
