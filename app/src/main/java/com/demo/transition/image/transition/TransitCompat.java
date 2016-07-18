@@ -1,7 +1,8 @@
 package com.demo.transition.image.transition;
 
 
-import android.os.Build;
+import android.support.v4.animation.AnimatorCompatHelper;
+import android.support.v4.animation.AnimatorUpdateListenerCompat;
 import android.support.v4.animation.ValueAnimatorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
@@ -84,37 +85,28 @@ public final class TransitCompat {
 	private TransitCompat() {
 	}
 
-	/**
-	 * The enter animation scales the picture in from its previous thumbnail size/location.
-	 *
-	 * @param listener For end of animation.
-	 */
 	public void enter(final ViewPropertyAnimatorListener listener) {
 		if (mTarget.get() == null) {
 			return;
 		}
-		final View targetIv = mTarget.get();
 		final Interpolator interpolator = new BakedBezierInterpolator();
-		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			animateEnterTarget(listener, targetIv, interpolator);
-		} else {
-			if (listener != null) {
-				listener.onAnimationStart(targetIv);
-				listener.onAnimationEnd(targetIv);
-				listener.onAnimationCancel(targetIv);
-			}
-		}
+		animateEnterTarget(listener,  interpolator);
 	}
 
-	private void animateEnterTarget(final ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
-		ViewCompat.setPivotX(targetIv, 0);
-		ViewCompat.setPivotY(targetIv, 0);
-		ViewCompat.setScaleX(targetIv, mWidthScale);
-		ViewCompat.setScaleY(targetIv, mHeightScale);
-		ViewCompat.setTranslationX(targetIv, mLeftDelta);
-		ViewCompat.setTranslationY(targetIv, mTopDelta);
+	private void animateEnterTarget(final ViewPropertyAnimatorListener listener,  Interpolator interpolator) {
+		View target = mTarget.get();
+		if (target == null) {
+			listener.onAnimationEnd(null);
+			return;
+		}
+		ViewCompat.setPivotX(target, 0);
+		ViewCompat.setPivotY(target, 0);
+		ViewCompat.setScaleX(target, mWidthScale);
+		ViewCompat.setScaleY(target, mHeightScale);
+		ViewCompat.setTranslationX(target, mLeftDelta);
+		ViewCompat.setTranslationY(target, mTopDelta);
 
-		ViewCompat.animate(targetIv)
+		ViewCompat.animate(target)
 		          .setDuration(ANIM_DURATION)
 		          .scaleX(1)
 		          .scaleY(1)
@@ -149,32 +141,24 @@ public final class TransitCompat {
 	}
 
 
-	/**
-	 * The exit animation is basically a reverse of the enter animation. This Animate image back to thumbnail
-	 * size/location as relieved from bundle.
-	 */
+
 	public void exit(final ViewPropertyAnimatorListener listener) {
 		if (mTarget.get() == null) {
 			return;
 		}
-		final View targetIv = mTarget.get();
 		final Interpolator interpolator = new BakedBezierInterpolator();
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-			animateExitTarget(listener, targetIv, interpolator);
-		} else {
-			if (listener != null) {
-				listener.onAnimationStart(targetIv);
-				listener.onAnimationEnd(targetIv);
-				listener.onAnimationCancel(targetIv);
-			}
-		}
+		animateExitTarget(listener, interpolator);
 	}
 
-	private void animateExitTarget(final ViewPropertyAnimatorListener listener, View targetIv, Interpolator interpolator) {
-		ViewCompat.animate(targetIv)
+	private void animateExitTarget(final ViewPropertyAnimatorListener listener, Interpolator interpolator) {
+		View target = mTarget.get();
+		if (target == null) {
+			listener.onAnimationStart(null);
+			return;
+		}
+
+		ViewCompat.animate(target)
 		          .setDuration(ANIM_DURATION * 2)
-		          .scaleX(mWidthScale)
-		          .scaleY(mHeightScale)
 		          .translationX(mLeftDelta)
 		          .translationY(mTopDelta)
 		          .setInterpolator(interpolator)
@@ -201,7 +185,36 @@ public final class TransitCompat {
 				          super.onAnimationCancel(view);
 				          listener.onAnimationCancel(view);
 			          }
-		          })
-		          .start();
+		          }).start();
+
+		ValueAnimatorCompat exitAnimator = AnimatorCompatHelper.emptyValueAnimator();
+		exitAnimator.setDuration(ANIM_DURATION * 2);
+		final int viewWidth = target.getWidth();
+		final int viewHeight = target.getHeight();
+		exitAnimator.addUpdateListener(new AnimatorUpdateListenerCompat() {
+			private float oldWidth = viewWidth;
+			private float endWidth = 0;
+			private float oldHeight = viewHeight;
+			private float endHeight = 0;
+
+			private Interpolator interpolator2 = new BakedBezierInterpolator();
+
+			@Override
+			public void onAnimationUpdate(ValueAnimatorCompat animation) {
+				View target = mTarget.get();
+				if (target == null) {
+					return;
+				}
+				float fraction = interpolator2.getInterpolation(animation.getAnimatedFraction());
+
+				float width = oldWidth + (fraction * (endWidth - oldWidth));
+				target.getLayoutParams().width = (int) width;
+				float height = oldHeight + (fraction * (endHeight - oldHeight));
+				target.getLayoutParams().height = (int) height;
+
+				target.requestLayout();
+			}
+		});
+		exitAnimator.start();
 	}
 }
