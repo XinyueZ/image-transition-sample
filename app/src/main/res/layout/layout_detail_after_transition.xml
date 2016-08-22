@@ -4,13 +4,14 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context="com.demo.transition.image.app.activities.DetailActivity">
 
-    <data class="LayoutDetailBinding">
+    <data class="LayoutDetailAfterTransBinding">
 
 
         <variable
             name="image"
             type="com.demo.transition.image.ds.Image"/>
     </data>
+
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/detail_root_cl"
@@ -43,7 +44,6 @@
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
                     android:scaleType="centerCrop"
-                    android:transitionName="@string/default_transition_name_detail"
                     app:imageUrl="@{image.getImageUrl().getNormal()}"
                     app:layout_collapseMode="parallax"
                     tools:ignore="ContentDescription,UnusedAttribute"
@@ -53,10 +53,10 @@
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    app:layout_collapseMode="pin"
                     app:elevation="@dimen/ab_elevation"
-                    app:title="@{image.getTitle()}"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:title="@{image.getTitle()}"/>
 
             </android.support.design.widget.CollapsingToolbarLayout>
 

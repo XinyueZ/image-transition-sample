@@ -80,10 +80,6 @@ public final class DetailFragment extends BaseFragment {
 		return Fragment.instantiate(App.Instance, DetailFragment.class.getName(), args);
 	}
 
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-	}
 
 	@Nullable
 	@Override
@@ -117,8 +113,6 @@ public final class DetailFragment extends BaseFragment {
 		                                     image.getImageUrl()
 		                                          .getHd()));
 		myShareActionProvider.setShareIntent(myShareIntent);
-
-		mBinding.toolbar.setTitle(image.getTitle());
 		mBinding.setImage(image);
 
 

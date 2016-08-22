@@ -12,6 +12,7 @@ import android.transition.Fade;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
 import com.demo.transition.image.app.fragments.DetailFragment;
+import com.demo.transition.image.app.fragments.DetailWithSupportTransitionFragment;
 import com.demo.transition.image.app.fragments.MainFragment;
 import com.demo.transition.image.bus.ClickImageEvent;
 import com.demo.transition.image.bus.CloseDetailFragmentEvent;
@@ -21,6 +22,7 @@ import com.demo.transition.image.transition.v21.PlatformTransition;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION;
 import static com.demo.transition.image.app.App.KEY_OPEN_DETAIL_ACTIVITY;
 import static com.demo.transition.image.app.App.PREFS;
 
@@ -52,6 +54,17 @@ public final class MainActivity extends BaseActivity {
 	 */
 	@Subscribe
 	public void onEvent(ClickImageEvent e) {
+		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
+		if(useSupportTransition) {
+			Fragment targetFrg = DetailWithSupportTransitionFragment.newInstance(e.getImage(), e.getThumbnail());
+			getSupportFragmentManager().beginTransaction()
+			                           .add(MAIN_CONTAINER, targetFrg)
+			                           .addToBackStack(null)
+			                           .commit();
+			return;
+		}
+
 		if (e.getThumbnail() != null) {
 			boolean currentOpenDetailActivity = App.Instance.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 			                                                .getBoolean(KEY_OPEN_DETAIL_ACTIVITY, App.DEFAULT_OPEN_DETAIL_ACTIVITY);
@@ -109,6 +122,18 @@ public final class MainActivity extends BaseActivity {
 
 	@Override
 	public void onBackPressed() {
+		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
+		if(useSupportTransition) {
+			if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+				super.onBackPressed();
+			} else {
+				EventBus.getDefault()
+				        .post(new CloseDetailFragmentEvent());
+			}
+			return;
+		}
+
 		boolean currentOpenDetailActivity = App.Instance.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 		                                                .getBoolean(KEY_OPEN_DETAIL_ACTIVITY, App.DEFAULT_OPEN_DETAIL_ACTIVITY);
 		if (!currentOpenDetailActivity) {

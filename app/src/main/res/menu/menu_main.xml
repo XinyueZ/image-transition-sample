@@ -5,12 +5,19 @@
             android:id="@+id/action_detail_activity"
             android:icon="@drawable/ic_detail_activity"
             android:title="@string/action_detail_activity"
-             >
+            >
         </item>
         <item
             android:id="@+id/action_detail_fragment"
             android:icon="@drawable/ic_detail_fragment"
-            android:title="@string/action_detail_fragment" >
+            android:title="@string/action_detail_fragment">
+        </item>
+
+
+        <item
+            android:id="@+id/action_use_support_transition"
+            android:icon="@drawable/ic_use_support_transition"
+            android:title="@string/action_use_support_transition">
         </item>
     </group>
 </menu>

@@ -25,19 +25,19 @@ public final class Thumbnail implements Serializable {
 		mSource = source;
 	}
 
-	int getTop() {
+	public int getTop() {
 		return mTop;
 	}
 
-	int getLeft() {
+	public int getLeft() {
 		return mLeft;
 	}
 
-	int getWidth() {
+	public int getWidth() {
 		return mWidth;
 	}
 
-	int getHeight() {
+	public int getHeight() {
 		return mHeight;
 	}
 
