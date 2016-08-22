@@ -4,11 +4,12 @@ package com.demo.transition.image.app.fragments;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.transition.Fade;
 import android.support.transition.Scene;
+import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.transition.TransitionSet;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListenerAdapter;
 import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,6 +41,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.Serializable;
 
+import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
+
 public final class DetailWithSupportTransitionFragment extends BaseFragment {
 	private static final String EXTRAS_IMAGE = DetailWithSupportTransitionFragment.class.getName() + ".EXTRAS.image";
 	private static final String EXTRAS_THUMBNAIL = DetailFragment.class.getName() + ".EXTRAS.thumbnail";
@@ -56,6 +60,32 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 
 	private Utils.ScreenSize mScreenSize;
 
+	private Transition.TransitionListener mListener = new Transition.TransitionListener() {
+		@Override
+		public void onTransitionStart(@NonNull Transition transition) {
+			Log.d(TAG, "Set onTransitionStart: ");
+		}
+
+		@Override
+		public void onTransitionEnd(@NonNull Transition transition) {
+			Log.d(TAG, "Set onTransitionEnd: ");
+		}
+
+		@Override
+		public void onTransitionCancel(@NonNull Transition transition) {
+			Log.d(TAG, "Set onTransitionCancel: ");
+		}
+
+		@Override
+		public void onTransitionPause(@NonNull Transition transition) {
+			Log.d(TAG, "Set onTransitionPause: ");
+		}
+
+		@Override
+		public void onTransitionResume(@NonNull Transition transition) {
+			Log.d(TAG, "Set onTransitionResume: ");
+		}
+	};
 	//------------------------------------------------
 	//Subscribes, event-handlers
 	//------------------------------------------------
@@ -99,13 +129,14 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 		mBeforeTransBinding = DataBindingUtil.bind(beforeV);
 		mAfterTransBinding = DataBindingUtil.bind(afterV);
 
-		//Bravo!
+		//Bravo begins!
 		mTransitionManager = new TransitionManager();
 		mTransitionSet = new TransitionSet();
 		mTransitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
 		mTransitionSet.setInterpolator(new BakedBezierInterpolator());
 		mTransitionSet.addTransition(new Scale(mAfterTransBinding.imageIv, 0.3f, 0.3f)).addTransition(new Fade(Fade.IN));
 		mTransitionSet.setDuration(TransitCompat.ANIM_DURATION);
+		mTransitionSet.addListener(mListener);
 		mTransitionManager.setTransition(mSceneBefore, mSceneAfter, mTransitionSet);
 
 		return rootV;
@@ -166,12 +197,11 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 
 
 	private void closeThisFragment() {
-
 		mTransitionManager.transitionTo(mSceneBefore);//Bravo!
 
 		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
 		ViewCompat.animate(mBeforeTransBinding.imageIv)
-		          .setDuration(TransitCompat.ANIM_DURATION)
+		          .setDuration(TransitCompat.ANIM_DURATION * 3)
 		          .alpha(1)
 		          .x(thumbnail.getLeft())
 		          .y(thumbnail.getTop())
@@ -179,13 +209,8 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 			          @Override
 			          public void onAnimationEnd(View view) {
 				          super.onAnimationEnd(view);
-				          new Handler().postDelayed(new Runnable() {
-					          @Override
-					          public void run() {
-						          EventBus.getDefault()
-						                  .post(new PopUpDetailFragmentEvent());
-					          }
-				          }, 500);
+				          EventBus.getDefault()
+				                  .post(new PopUpDetailFragmentEvent());
 			          }
 		          })
 		          .start();
