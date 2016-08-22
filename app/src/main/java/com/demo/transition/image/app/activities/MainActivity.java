@@ -6,8 +6,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.transition.Fade;
+import android.widget.ImageView;
 
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
@@ -22,15 +24,18 @@ import com.demo.transition.image.transition.v21.PlatformTransition;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.lang.ref.WeakReference;
+
 import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION;
 import static com.demo.transition.image.app.App.KEY_OPEN_DETAIL_ACTIVITY;
 import static com.demo.transition.image.app.App.PREFS;
 
-public final class MainActivity extends BaseActivity {
+public final class MainActivity extends BaseActivity implements FragmentManager.OnBackStackChangedListener {
 
 	private static final int LAYOUT = R.layout.activity_main;
 	private static final int MAIN_CONTAINER = R.id.main_fl;
 	private Fragment mMainFragment;
+	private WeakReference<ImageView> mThumbnailIvRef;
 
 	//------------------------------------------------
 	//Subscribes, event-handlers
@@ -57,6 +62,11 @@ public final class MainActivity extends BaseActivity {
 		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
 		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
 		if(useSupportTransition) {
+			getSupportFragmentManager().addOnBackStackChangedListener(this);
+			mThumbnailIvRef = e.getSharedImageViewWeakRef();
+			if(mThumbnailIvRef != null && mThumbnailIvRef.get() != null) {
+				ViewCompat.animate(mThumbnailIvRef.get()).alpha(0).start();
+			}
 			Fragment targetFrg = DetailWithSupportTransitionFragment.newInstance(e.getImage(), e.getThumbnail());
 			getSupportFragmentManager().beginTransaction()
 			                           .add(MAIN_CONTAINER, targetFrg)
@@ -146,5 +156,20 @@ public final class MainActivity extends BaseActivity {
 		} else {
 			super.onBackPressed();
 		}
+	}
+
+	@Override
+	public void onBackStackChanged() {
+		if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+			if(mThumbnailIvRef != null && mThumbnailIvRef.get() != null) {
+				ViewCompat.animate(mThumbnailIvRef.get()).alpha(1).start();
+			}
+		}
+	}
+
+	@Override
+	protected void onStop() {
+		mThumbnailIvRef = null;
+		super.onStop();
 	}
 }

@@ -32,4 +32,10 @@ public final class ClickImageEvent {
 	public ImageView getSharedImageView() {
 		return mSharedImageView.get();
 	}
+
+
+	public WeakReference<ImageView>  getSharedImageViewWeakRef() {
+		return mSharedImageView;
+	}
+
 }
