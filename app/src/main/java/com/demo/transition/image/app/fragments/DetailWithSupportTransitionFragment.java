@@ -129,7 +129,7 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 						          //Bravo!
 						          TransitionManager.go(mSceneAfter,
 						                               new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
-						                                                  .addTransition(new Scale(0.5f, 0.5f))
+						                                                  .addTransition(new Scale(0f, 0f))
 						                                                  .addTransition(new Fade(Fade.IN))
 						                                                  .setInterpolator(new BakedBezierInterpolator()));
 						          Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition, Snackbar.LENGTH_SHORT)

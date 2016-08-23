@@ -106,7 +106,7 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 				//Bravo!
 				TransitionManager.go(mSceneAfter,
 				                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
-				                                        .addTransition(new Scale(0.5f, 0.5f))
+				                                        .addTransition(new Scale(0f, 0f))
 				                                        .addTransition(new Fade(Fade.IN))
 				                                        .setInterpolator(new BakedBezierInterpolator()));
 
