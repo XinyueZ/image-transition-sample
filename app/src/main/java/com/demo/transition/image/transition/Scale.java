@@ -14,12 +14,12 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
-import static com.demo.transition.image.transition.TransitCompat.ANIM_DURATION;
 
 
 public final class Scale extends Visibility {
-	private float mStartXValue;
-	private float mStartYValue;
+	private static final int DURATION = 2000;
+	private final float mStartXValue;
+	private final float mStartYValue;
 
 
 	public Scale(float startXValue, float startYValue) {
@@ -56,21 +56,21 @@ public final class Scale extends Visibility {
 		View view = sceneRoot;
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-			int startRadius = 10;
+			int startRadius = 0;
 			int endRadius = Math.max(sceneRoot.getWidth(), sceneRoot.getHeight());
 			int centerX = (int) ViewCompat.getPivotX(sceneRoot);
 			int centerY = (int) ViewCompat.getPivotY(sceneRoot);
 			Animator reveal = ViewAnimationUtils.createCircularReveal(sceneRoot, centerX, centerY, startRadius, endRadius);
 			reveal.setInterpolator(new BakedBezierInterpolator());
-			reveal.setDuration(ANIM_DURATION * 4);
+			reveal.setDuration(DURATION);
 			return reveal;
 		}
 
 		AnimatorSet animatorSet = new AnimatorSet();
 		animatorSet.playTogether(ObjectAnimator.ofFloat(view, "scaleX", mStartXValue, 1)
-		                                       .setDuration(2000),
+		                                       .setDuration(DURATION),
 		                         ObjectAnimator.ofFloat(view, "scaleY", mStartYValue, 1)
-		                                       .setDuration(2000));
+		                                       .setDuration(DURATION));
 		return animatorSet;
 	}
 }

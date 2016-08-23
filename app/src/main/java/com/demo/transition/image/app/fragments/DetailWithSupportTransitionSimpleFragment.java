@@ -30,7 +30,6 @@ import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.BakedBezierInterpolator;
 import com.demo.transition.image.transition.Scale;
 import com.demo.transition.image.transition.Thumbnail;
-import com.demo.transition.image.transition.TransitCompat;
 import com.demo.transition.image.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -106,7 +105,6 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		mTransitionSet.setInterpolator(new BakedBezierInterpolator());
 		mTransitionSet.addTransition(new Scale(0.5f, 0.5f))
 		              .addTransition(new Fade(Fade.IN));
-		mTransitionSet.setDuration(TransitCompat.ANIM_DURATION);
 		mTransitionManager.setTransition(mSceneBefore, mSceneAfter, mTransitionSet);
 
 		return rootV;

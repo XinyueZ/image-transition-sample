@@ -106,7 +106,6 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 		mTransitionSet.setInterpolator(new BakedBezierInterpolator());
 		mTransitionSet.addTransition(new Scale(0.5f, 0.5f))
 		              .addTransition(new Fade(Fade.IN));
-		mTransitionSet.setDuration(TransitCompat.ANIM_DURATION);
 		mTransitionSet.excludeTarget(mAfterTransBinding.imageIv, true);
 		mTransitionManager.setTransition(mSceneBefore, mSceneAfter, mTransitionSet);
 

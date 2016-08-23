@@ -68,8 +68,13 @@ public final class MainActivity extends BaseActivity implements FragmentManager.
 		if(useSupportTransition || useSupportTransitionSimple) {
 			getSupportFragmentManager().addOnBackStackChangedListener(this);
 			mThumbnailIvRef = e.getSharedImageViewWeakRef();
-			if(mThumbnailIvRef != null && mThumbnailIvRef.get() != null) {
-				ViewCompat.animate(mThumbnailIvRef.get()).alpha(0).start();
+			if(mThumbnailIvRef != null ) {
+				ImageView imageView = mThumbnailIvRef.get();
+				if(imageView != null) {
+					ViewCompat.animate(imageView)
+					          .alpha(0)
+					          .start();
+				}
 			}
 			Fragment targetFrg = useSupportTransition ? DetailWithSupportTransitionFragment.newInstance(e.getImage(), e.getThumbnail()) :
 			                     DetailWithSupportTransitionSimpleFragment.newInstance(e.getImage(), e.getThumbnail()) ;
