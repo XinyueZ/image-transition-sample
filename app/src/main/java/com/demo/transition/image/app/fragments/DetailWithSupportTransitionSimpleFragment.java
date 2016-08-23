@@ -6,6 +6,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.transition.Fade;
 import android.support.transition.Scene;
 import android.support.transition.TransitionManager;
@@ -131,6 +132,9 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 			@Override
 			public void run() {
 				mTransitionManager.transitionTo(mSceneAfter);//Bravo!
+
+				Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition_simple, Snackbar.LENGTH_SHORT)
+				        .show();
 			}
 		}, 100);
 
