@@ -1,5 +1,6 @@
 package com.demo.transition.image.transition;
 
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -12,17 +13,8 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 
-
-public final class Scale extends Visibility {
+public final class Shrink extends Visibility {
 	public static final int DURATION = 1000;
-	private final float mStartXValue;
-	private final float mStartYValue;
-
-
-	public Scale(float startXValue, float startYValue) {
-		mStartXValue = startXValue;
-		mStartYValue = startYValue;
-	}
 
 
 	@Nullable
@@ -31,8 +23,8 @@ public final class Scale extends Visibility {
 		View view = sceneRoot;
 
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-			int startRadius = 0;
-			int endRadius = Math.max(sceneRoot.getWidth(), sceneRoot.getHeight());
+			int startRadius = Math.max(sceneRoot.getWidth(), sceneRoot.getHeight());
+			int endRadius = 0;
 			int centerX = (int) ViewCompat.getPivotX(sceneRoot);
 			int centerY = (int) ViewCompat.getPivotY(sceneRoot);
 			Animator reveal = ViewAnimationUtils.createCircularReveal(sceneRoot, centerX, centerY, startRadius, endRadius);
@@ -42,9 +34,9 @@ public final class Scale extends Visibility {
 		}
 
 		AnimatorSet animatorSet = new AnimatorSet();
-		animatorSet.playTogether(ObjectAnimator.ofFloat(view, "scaleX", mStartXValue, 1)
+		animatorSet.playTogether(ObjectAnimator.ofFloat(view, "scaleX", 1, 0)
 		                                       .setDuration(DURATION),
-		                         ObjectAnimator.ofFloat(view, "scaleY", mStartYValue, 1)
+		                         ObjectAnimator.ofFloat(view, "scaleY", 1, 0)
 		                                       .setDuration(DURATION));
 		return animatorSet;
 	}
@@ -56,4 +48,5 @@ public final class Scale extends Visibility {
 	@Override
 	public void captureStartValues(@NonNull TransitionValues transitionValues) {
 	}
+
 }

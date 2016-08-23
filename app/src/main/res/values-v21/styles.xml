@@ -15,6 +15,7 @@
 
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
 
         <item name="android:timePickerDialogTheme">@style/AlertDialogCustom</item>
         <item name="android:datePickerDialogTheme">@style/AlertDialogCustom</item>

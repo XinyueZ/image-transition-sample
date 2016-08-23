@@ -4,11 +4,13 @@ package com.demo.transition.image.app.fragments;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.transition.ChangeBounds;
 import android.support.transition.Fade;
 import android.support.transition.Scene;
+import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.transition.TransitionSet;
 import android.support.v4.app.Fragment;
@@ -29,8 +31,9 @@ import com.demo.transition.image.databinding.LayoutDetailBeforeTransBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.BakedBezierInterpolator;
 import com.demo.transition.image.transition.Scale;
+import com.demo.transition.image.transition.Shrink;
+import com.demo.transition.image.transition.SimpleTransitionListener;
 import com.demo.transition.image.transition.Thumbnail;
-import com.demo.transition.image.utils.Utils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,12 +50,8 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 	private LayoutDetailBeforeTransBinding mBeforeTransBinding;
 	private LayoutDetailAfterTransBinding mAfterTransBinding;
 
-	private TransitionManager mTransitionManager;
 	private Scene mSceneBefore;
 	private Scene mSceneAfter;
-	private TransitionSet mTransitionSet;
-
-	private Utils.ScreenSize mScreenSize;
 
 
 	//------------------------------------------------
@@ -80,11 +79,6 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		return Fragment.instantiate(App.Instance, DetailWithSupportTransitionSimpleFragment.class.getName(), args);
 	}
 
-	@Override
-	public void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mScreenSize = Utils.getScreenSize(App.Instance);
-	}
 
 	@Nullable
 	@Override
@@ -98,14 +92,6 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		mBeforeTransBinding = DataBindingUtil.bind(beforeV);
 		mAfterTransBinding = DataBindingUtil.bind(afterV);
 
-		//Bravo begins!
-		mTransitionManager = new TransitionManager();
-		mTransitionSet = new TransitionSet();
-		mTransitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
-		mTransitionSet.setInterpolator(new BakedBezierInterpolator());
-		mTransitionSet.addTransition(new Scale(0.5f, 0.5f))
-		              .addTransition(new Fade(Fade.IN));
-		mTransitionManager.setTransition(mSceneBefore, mSceneAfter, mTransitionSet);
 
 		return rootV;
 	}
@@ -113,28 +99,35 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		mTransitionManager.transitionTo(mSceneBefore);//Bravo!
-
-		Serializable imageMeta = getArguments().getSerializable(EXTRAS_IMAGE);
-		Image image = (Image) imageMeta;
-		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
-		mBeforeTransBinding.imageIv.setX(thumbnail.getLeft());
-		mBeforeTransBinding.imageIv.setY(thumbnail.getTop());
-		mBeforeTransBinding.imageIv.getLayoutParams().width = thumbnail.getWidth();
-		mBeforeTransBinding.imageIv.getLayoutParams().height = thumbnail.getHeight();
-		ViewCompat.setPivotX(view, thumbnail.getLeft());
-		ViewCompat.setPivotY(view, thumbnail.getTop());
-		mBeforeTransBinding.setImage(image);
-
-		new Handler().postDelayed(new Runnable() {
+		//Bravo!
+		TransitionManager.go(mSceneBefore, new ChangeBounds().addListener(new SimpleTransitionListener() {
 			@Override
-			public void run() {
-				mTransitionManager.transitionTo(mSceneAfter);//Bravo!
+			public void onTransitionEnd(@NonNull Transition transition) {
+				//Bravo!
+				TransitionManager.go(mSceneAfter,
+				                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
+				                                        .addTransition(new Scale(0.5f, 0.5f))
+				                                        .addTransition(new Fade(Fade.IN))
+				                                        .setInterpolator(new BakedBezierInterpolator()));
 
 				Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition_simple, Snackbar.LENGTH_SHORT)
 				        .show();
 			}
-		}, 100);
+		}));
+
+		Serializable imageMeta = getArguments().getSerializable(EXTRAS_IMAGE);
+		Image image = (Image) imageMeta;
+		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
+
+		int openPointX = thumbnail.getLeft() + thumbnail.getWidth() / 2;
+		int openPointY = thumbnail.getTop() + thumbnail.getHeight() / 2;
+		mBeforeTransBinding.imageIv.setX(thumbnail.getLeft());
+		mBeforeTransBinding.imageIv.setY( thumbnail.getTop() );
+		mBeforeTransBinding.imageIv.getLayoutParams().width = thumbnail.getWidth();
+		mBeforeTransBinding.imageIv.getLayoutParams().height = thumbnail.getHeight();
+		ViewCompat.setPivotX(view, openPointX);
+		ViewCompat.setPivotY(view, openPointY);
+		mBeforeTransBinding.setImage(image);
 
 
 		mAfterTransBinding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
@@ -160,7 +153,20 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 
 
 	private void closeThisFragment() {
-		EventBus.getDefault()
-		        .post(new PopUpDetailFragmentEvent());
+		TransitionManager.go(mSceneBefore,
+		                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
+		                                        .addTransition(new Shrink())
+		                                        .addTransition(new Fade(Fade.OUT))
+		                                        .setInterpolator(new BakedBezierInterpolator())
+		                                        .addListener(new SimpleTransitionListener() {
+			                                        @Override
+			                                        public void onTransitionEnd(@NonNull Transition transition) {
+				                                        super.onTransitionEnd(transition);
+				                                        EventBus.getDefault()
+				                                                .post(new PopUpDetailFragmentEvent());
+			                                        }
+		                                        }));
 	}
+
+
 }
