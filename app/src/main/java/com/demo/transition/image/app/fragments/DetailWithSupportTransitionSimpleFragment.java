@@ -103,7 +103,8 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		mTransitionSet = new TransitionSet();
 		mTransitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
 		mTransitionSet.setInterpolator(new BakedBezierInterpolator());
-		mTransitionSet.addTransition(new Scale(0.5f, 0.5f)).addTransition(new Fade(Fade.IN));
+		mTransitionSet.addTransition(new Scale(0.5f, 0.5f))
+		              .addTransition(new Fade(Fade.IN));
 		mTransitionSet.setDuration(TransitCompat.ANIM_DURATION);
 		mTransitionManager.setTransition(mSceneBefore, mSceneAfter, mTransitionSet);
 
@@ -122,8 +123,8 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		mBeforeTransBinding.imageIv.setY(thumbnail.getTop());
 		mBeforeTransBinding.imageIv.getLayoutParams().width = thumbnail.getWidth();
 		mBeforeTransBinding.imageIv.getLayoutParams().height = thumbnail.getHeight();
-		ViewCompat.setPivotX(view,thumbnail.getLeft() );
-		ViewCompat.setPivotY(view,thumbnail.getTop() );
+		ViewCompat.setPivotX(view, thumbnail.getLeft());
+		ViewCompat.setPivotY(view, thumbnail.getTop());
 		mBeforeTransBinding.setImage(image);
 
 		new Handler().postDelayed(new Runnable() {

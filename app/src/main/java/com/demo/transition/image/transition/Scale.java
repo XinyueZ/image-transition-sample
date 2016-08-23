@@ -15,22 +15,15 @@ import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 
 public final class Scale extends Visibility {
-	private View mTarget;
 	private float mStartXValue;
 	private float mStartYValue;
-
-
-	public Scale(View target, float startXValue, float startYValue) {
-		mTarget = target;
-		mStartXValue = startXValue;
-		mStartYValue = startYValue;
-	}
 
 
 	public Scale(float startXValue, float startYValue) {
 		mStartXValue = startXValue;
 		mStartYValue = startYValue;
 	}
+
 
 	@Override
 	public void captureEndValues(@NonNull TransitionValues transitionValues) {
@@ -57,7 +50,7 @@ public final class Scale extends Visibility {
 	@Nullable
 	@Override
 	public Animator createAnimator(@NonNull ViewGroup sceneRoot, @Nullable TransitionValues startValues, @Nullable TransitionValues endValues) {
-		View view = mTarget == null ? sceneRoot : mTarget;
+		View view = sceneRoot;
 		AnimatorSet animatorSet = new AnimatorSet();
 		animatorSet.playTogether(ObjectAnimator.ofFloat(view, "scaleX", mStartXValue, 1)
 		                                       .setDuration(2000),
