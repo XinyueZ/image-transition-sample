@@ -43,6 +43,7 @@ import retrofit2.Response;
 
 import static com.demo.transition.image.app.App.DEFAULT_OPEN_DETAIL_ACTIVITY;
 import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION;
+import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION_SIMPLE;
 import static com.demo.transition.image.app.App.Instance;
 
 public final class MainFragment extends BaseFragment {
@@ -130,12 +131,21 @@ public final class MainFragment extends BaseFragment {
 			menu.findItem(R.id.action_detail_fragment)
 			    .setChecked(currentOpenDetailActivity);
 		}
+
 		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
 		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
 		if(useSupportTransition) {
 			menu.findItem(R.id.action_use_support_transition)
 			    .setChecked(currentOpenDetailActivity);
 		}
+
+		boolean useSupportTransitionSimple = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, DEFAULT_USE_SUPPORT_TRANSITION_SIMPLE);
+		if(useSupportTransitionSimple) {
+			menu.findItem(R.id.action_use_support_transition_simple)
+			    .setChecked(currentOpenDetailActivity);
+		}
+
 		mBinding.toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
@@ -150,6 +160,10 @@ public final class MainFragment extends BaseFragment {
 						        .edit()
 						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION, false)
 						        .apply();
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, false)
+						        .apply();
 						break;
 					case R.id.action_detail_fragment:
 						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
@@ -160,6 +174,10 @@ public final class MainFragment extends BaseFragment {
 						        .edit()
 						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION, false)
 						        .apply();
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, false)
+						        .apply();
 						break;
 					case R.id.action_use_support_transition:
 						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
@@ -169,6 +187,24 @@ public final class MainFragment extends BaseFragment {
 						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
 						        .edit()
 						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION, true)
+						        .apply();
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, false)
+						        .apply();
+						break;
+					case R.id.action_use_support_transition_simple:
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_OPEN_DETAIL_ACTIVITY, false)
+						        .apply();
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION, false)
+						        .apply();
+						Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
+						        .edit()
+						        .putBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, true)
 						        .apply();
 						break;
 				}
