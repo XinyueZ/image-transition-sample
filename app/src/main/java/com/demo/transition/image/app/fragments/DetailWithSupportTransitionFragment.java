@@ -57,7 +57,6 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 
 	private Scene mSceneBefore;
 	private Scene mSceneAfter;
-	private TransitionSet mTransitionSet;
 
 	private Utils.ScreenSize mScreenSize;
 
