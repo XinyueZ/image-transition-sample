@@ -7,13 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.transition.ChangeBounds;
-import android.support.transition.Fade;
 import android.support.transition.Scene;
 import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.transition.TransitionSet;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -29,6 +28,7 @@ import com.demo.transition.image.bus.PopUpDetailFragmentEvent;
 import com.demo.transition.image.databinding.LayoutDetailAfterTransBinding;
 import com.demo.transition.image.databinding.LayoutDetailBeforeTransBinding;
 import com.demo.transition.image.ds.Image;
+import com.demo.transition.image.transition.BackgroundColor;
 import com.demo.transition.image.transition.BakedBezierInterpolator;
 import com.demo.transition.image.transition.Scale;
 import com.demo.transition.image.transition.Shrink;
@@ -100,20 +100,21 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		//Bravo!
-		TransitionManager.go(mSceneBefore, new ChangeBounds().addListener(new SimpleTransitionListener() {
-			@Override
-			public void onTransitionEnd(@NonNull Transition transition) {
-				//Bravo!
-				TransitionManager.go(mSceneAfter,
-				                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
-				                                        .addTransition(new Scale(0f, 0f))
-				                                        .addTransition(new Fade(Fade.OUT))
-				                                        .setInterpolator(new BakedBezierInterpolator()));
+		TransitionManager.go(mSceneBefore,
+		                     new BackgroundColor(ContextCompat.getColor(getContext(), R.color.colorWhiteTransparent),
+		                                         ContextCompat.getColor(getContext(), R.color.colorWhite)).addListener(new SimpleTransitionListener() {
+			                     @Override
+			                     public void onTransitionEnd(@NonNull Transition transition) {
+				                     //Bravo!
+				                     TransitionManager.go(mSceneAfter,
+				                                          new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
+				                                                             .addTransition(new Scale(0f, 0f))
+				                                                             .setInterpolator(new BakedBezierInterpolator()));
 
-				Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition_simple, Snackbar.LENGTH_SHORT)
-				        .show();
-			}
-		}));
+				                     Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition_simple, Snackbar.LENGTH_SHORT)
+				                             .show();
+			                     }
+		                     }));
 
 		Serializable imageMeta = getArguments().getSerializable(EXTRAS_IMAGE);
 		Image image = (Image) imageMeta;
@@ -122,7 +123,7 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		int openPointX = thumbnail.getLeft() + thumbnail.getWidth() / 2;
 		int openPointY = thumbnail.getTop() + thumbnail.getHeight() / 2;
 		mBeforeTransBinding.imageIv.setX(thumbnail.getLeft());
-		mBeforeTransBinding.imageIv.setY( thumbnail.getTop() );
+		mBeforeTransBinding.imageIv.setY(thumbnail.getTop());
 		mBeforeTransBinding.imageIv.getLayoutParams().width = thumbnail.getWidth();
 		mBeforeTransBinding.imageIv.getLayoutParams().height = thumbnail.getHeight();
 		ViewCompat.setPivotX(view, openPointX);
@@ -156,7 +157,6 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 		TransitionManager.go(mSceneBefore,
 		                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
 		                                        .addTransition(new Shrink())
-		                                        .addTransition(new Fade(Fade.OUT))
 		                                        .setInterpolator(new BakedBezierInterpolator())
 		                                        .addListener(new SimpleTransitionListener() {
 			                                        @Override
