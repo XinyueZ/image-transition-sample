@@ -32,6 +32,7 @@ import com.demo.transition.image.databinding.LayoutDetailBeforeTransBinding;
 import com.demo.transition.image.ds.Image;
 import com.demo.transition.image.transition.BakedBezierInterpolator;
 import com.demo.transition.image.transition.Scale;
+import com.demo.transition.image.transition.Shrink;
 import com.demo.transition.image.transition.SimpleTransitionListener;
 import com.demo.transition.image.transition.Thumbnail;
 import com.demo.transition.image.transition.TransitCompat;
@@ -111,16 +112,26 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 	@Override
 	public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+		Serializable imageMeta = getArguments().getSerializable(EXTRAS_IMAGE);
+		Image image = (Image) imageMeta;
+		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
+
 		//Bravo!
+		int openPointX = mScreenSize.Width / 2 +  thumbnail.getWidth() / 2;
+		int openPointY = (int) (getResources().getDimension(R.dimen.detail_backdrop_height) / 2)+  thumbnail.getHeight() / 2;
+		ViewCompat.setPivotX(view, openPointX);
+		ViewCompat.setPivotY(view, openPointY);
 		TransitionManager.go(mSceneBefore, new ChangeBounds().addListener(new SimpleTransitionListener(){
 			@Override
 			public void onTransitionEnd(@NonNull Transition transition) {
 				super.onTransitionEnd(transition);
+				int openPointX = mScreenSize.Width / 2;
+				int openPointY = (int) (getResources().getDimension(R.dimen.detail_backdrop_height) / 2);
 				ViewCompat.animate(mBeforeTransBinding.imageIv)
-				          .setDuration(DURATION)
+				          .setDuration(DURATION / 2)
 				          .alpha(0.0f)
-				          .x(mScreenSize.Width / 2)
-				          .y(getResources().getDimension(R.dimen.detail_backdrop_height) / 2)
+				          .x(openPointX)
+				          .y(openPointY)
 				          .setListener(new ViewPropertyAnimatorListenerAdapter() {
 					          @Override
 					          public void onAnimationEnd(View view) {
@@ -130,7 +141,7 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 						          TransitionManager.go(mSceneAfter,
 						                               new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
 						                                                  .addTransition(new Scale(0f, 0f))
-						                                                  .addTransition(new Fade(Fade.IN))
+						                                                  .addTransition(new Fade(Fade.OUT))
 						                                                  .setInterpolator(new BakedBezierInterpolator()));
 						          Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition, Snackbar.LENGTH_SHORT)
 						                  .show();
@@ -140,9 +151,6 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 			}
 		}));
 
-		Serializable imageMeta = getArguments().getSerializable(EXTRAS_IMAGE);
-		Image image = (Image) imageMeta;
-		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
 		mBeforeTransBinding.imageIv.setX(thumbnail.getLeft());
 		mBeforeTransBinding.imageIv.setY(thumbnail.getTop());
 		mBeforeTransBinding.imageIv.getLayoutParams().width = thumbnail.getWidth();
@@ -174,21 +182,35 @@ public final class DetailWithSupportTransitionFragment extends BaseFragment {
 
 	private void closeThisFragment() {
 		//Bravo!
-		TransitionManager.go(mSceneBefore);
-		Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
-		ViewCompat.animate(mBeforeTransBinding.imageIv)
-		          .setDuration(TransitCompat.ANIM_DURATION)
-		          .alpha(1)
-		          .x(thumbnail.getLeft())
-		          .y(thumbnail.getTop())
-		          .setListener(new ViewPropertyAnimatorListenerAdapter() {
-			          @Override
-			          public void onAnimationEnd(View view) {
-				          super.onAnimationEnd(view);
-				          EventBus.getDefault()
-				                  .post(new PopUpDetailFragmentEvent());
-			          }
-		          })
-		          .start();
+		TransitionManager.go(mSceneBefore, new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
+		                                                      .addTransition(new Shrink())
+		                                                      .addTransition(new Fade(Fade.OUT))
+		                                                      .setInterpolator(new BakedBezierInterpolator()).addListener(new SimpleTransitionListener(){
+					@Override
+					public void onTransitionStart(@NonNull Transition transition) {
+						super.onTransitionStart(transition);
+						ViewCompat.setAlpha(mBeforeTransBinding.imageIv, 1);
+					}
+
+					@Override
+					public void onTransitionEnd(@NonNull Transition transition) {
+						super.onTransitionEnd(transition);
+						Thumbnail thumbnail = (Thumbnail) getArguments().getSerializable(EXTRAS_THUMBNAIL);
+						ViewCompat.animate(mBeforeTransBinding.imageIv)
+						          .setDuration(TransitCompat.ANIM_DURATION / 2)
+						          .x(thumbnail.getLeft())
+						          .y(thumbnail.getTop())
+						          .setListener(new ViewPropertyAnimatorListenerAdapter() {
+							          @Override
+							          public void onAnimationEnd(View view) {
+								          super.onAnimationEnd(view);
+								          EventBus.getDefault()
+								                  .post(new PopUpDetailFragmentEvent());
+							          }
+						          })
+						          .start();
+					}
+				}));
+
 	}
 }

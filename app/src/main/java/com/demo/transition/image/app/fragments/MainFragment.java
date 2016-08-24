@@ -242,9 +242,7 @@ public final class MainFragment extends BaseFragment {
 		String timeZone = calendar.getTimeZone()
 		                          .getID();
 		loadPhotoList(year, shownMonth, timeZone);
-		if (currentDay < 15) {
-			loadPhotoList(year, currentMonth, timeZone);
-		}
+
 	}
 
 	private synchronized void setData(List<Image> imagesList) {

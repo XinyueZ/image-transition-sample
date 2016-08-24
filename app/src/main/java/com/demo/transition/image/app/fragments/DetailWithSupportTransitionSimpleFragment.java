@@ -107,7 +107,7 @@ public final class DetailWithSupportTransitionSimpleFragment extends BaseFragmen
 				TransitionManager.go(mSceneAfter,
 				                     new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER)
 				                                        .addTransition(new Scale(0f, 0f))
-				                                        .addTransition(new Fade(Fade.IN))
+				                                        .addTransition(new Fade(Fade.OUT))
 				                                        .setInterpolator(new BakedBezierInterpolator()));
 
 				Snackbar.make(mAfterTransBinding.detailRootCl, R.string.action_use_support_transition_simple, Snackbar.LENGTH_SHORT)
