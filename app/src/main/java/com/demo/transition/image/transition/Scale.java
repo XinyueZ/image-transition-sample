@@ -42,9 +42,9 @@ public final class Scale extends Visibility {
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 			int startRadius = 0;
 			int endRadius = Math.max(sceneRoot.getWidth(), sceneRoot.getHeight());
-			int centerX = (int) ViewCompat.getPivotX(sceneRoot);
-			int centerY = (int) ViewCompat.getPivotY(sceneRoot);
-			Animator reveal = ViewAnimationUtils.createCircularReveal(sceneRoot, centerX, centerY, startRadius, endRadius);
+			int startX = (int) ViewCompat.getPivotX(sceneRoot);
+			int startY = (int) ViewCompat.getPivotY(sceneRoot);
+			Animator reveal = ViewAnimationUtils.createCircularReveal(sceneRoot, startX, startY, startRadius, endRadius);
 			reveal.setInterpolator(new BakedBezierInterpolator());
 			reveal.setDuration(DURATION);
 			return reveal;
