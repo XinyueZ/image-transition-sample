@@ -1,10 +1,9 @@
 <resources>
     <string name="app_name">ImageTransitionSample</string>
-    <string name="api_images">http://nasa-photo-dev6.appspot.com/</string>
+    <string name="api_images">http://nasa-photo-dev3.appspot.com/</string>
     <string name="share">Share</string>
     <string name="action_detail_activity">Detail with activity</string>
     <string name="action_detail_fragment">Detail with fragment</string>
-    <string name="action_use_support_transition">Use support transition</string>
     <string name="action_use_support_transition_simple">Use support transition simple</string>
     <string name="default_transition_name_detail">default_transition_name_detail</string>
 </resources>

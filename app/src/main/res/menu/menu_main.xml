@@ -14,11 +14,7 @@
         </item>
 
 
-        <item
-            android:id="@+id/action_use_support_transition"
-            android:icon="@drawable/ic_use_support_transition"
-            android:title="@string/action_use_support_transition">
-        </item>
+
 
         <item
             android:id="@+id/action_use_support_transition_simple"

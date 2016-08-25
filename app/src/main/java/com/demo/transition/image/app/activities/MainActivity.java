@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import com.demo.transition.image.R;
 import com.demo.transition.image.app.App;
 import com.demo.transition.image.app.fragments.DetailFragment;
-import com.demo.transition.image.app.fragments.DetailWithSupportTransitionFragment;
 import com.demo.transition.image.app.fragments.DetailWithSupportTransitionSimpleFragment;
 import com.demo.transition.image.app.fragments.MainFragment;
 import com.demo.transition.image.bus.ClickImageEvent;
@@ -27,7 +26,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.lang.ref.WeakReference;
 
-import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION;
 import static com.demo.transition.image.app.App.DEFAULT_USE_SUPPORT_TRANSITION_SIMPLE;
 import static com.demo.transition.image.app.App.KEY_OPEN_DETAIL_ACTIVITY;
 import static com.demo.transition.image.app.App.PREFS;
@@ -61,11 +59,9 @@ public final class MainActivity extends BaseActivity implements FragmentManager.
 	 */
 	@Subscribe
 	public void onEvent(ClickImageEvent e) {
-		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
-		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
 		boolean useSupportTransitionSimple = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
 		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, DEFAULT_USE_SUPPORT_TRANSITION_SIMPLE);
-		if(useSupportTransition || useSupportTransitionSimple) {
+		if( useSupportTransitionSimple) {
 			getSupportFragmentManager().addOnBackStackChangedListener(this);
 			mThumbnailIvRef = e.getSharedImageViewWeakRef();
 			if(mThumbnailIvRef != null ) {
@@ -76,8 +72,7 @@ public final class MainActivity extends BaseActivity implements FragmentManager.
 					          .start();
 				}
 			}
-			Fragment targetFrg = useSupportTransition ? DetailWithSupportTransitionFragment.newInstance(e.getImage(), e.getThumbnail()) :
-			                     DetailWithSupportTransitionSimpleFragment.newInstance(e.getImage(), e.getThumbnail()) ;
+			Fragment targetFrg =   DetailWithSupportTransitionSimpleFragment.newInstance(e.getImage(), e.getThumbnail()) ;
 			getSupportFragmentManager().beginTransaction()
 			                           .add(MAIN_CONTAINER, targetFrg)
 			                           .addToBackStack(null)
@@ -142,11 +137,9 @@ public final class MainActivity extends BaseActivity implements FragmentManager.
 
 	@Override
 	public void onBackPressed() {
-		boolean useSupportTransition = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
-		                                           .getBoolean(App.KEY_USE_SUPPORT_TRANSITION, DEFAULT_USE_SUPPORT_TRANSITION);
 		boolean useSupportTransitionSimple = App.Instance.getSharedPreferences(App.PREFS, Context.MODE_PRIVATE)
 		                                                 .getBoolean(App.KEY_USE_SUPPORT_TRANSITION_SIMPLE, DEFAULT_USE_SUPPORT_TRANSITION_SIMPLE);
-		if(useSupportTransition || useSupportTransitionSimple) {
+		if( useSupportTransitionSimple) {
 			if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
 				super.onBackPressed();
 			} else {

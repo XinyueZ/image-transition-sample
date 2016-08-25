@@ -18,11 +18,16 @@ import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 
 public final class Scale extends Visibility {
 	public static final int DURATION = 500;
-	private final float mStartXValue;
-	private final float mStartYValue;
+	private float mStartXValue = 0;
+	private float mStartYValue = 0;
 
+
+	public Scale() {
+		super();
+	}
 
 	public Scale(float startXValue, float startYValue) {
+		super();
 		mStartXValue = startXValue;
 		mStartYValue = startYValue;
 	}
